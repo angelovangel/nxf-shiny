@@ -1,23 +1,10 @@
 [
   {
-    "type": "sliderInput",
-    "inputId": "slider1",
-    "label": "Number of observations",
-    "min": 1,
-    "max": 100,
-    "value": 50
-  },
-  {
     "type": "selectInput",
-    "inputId": "select1",
-    "label": "Choose a letter",
-    "choices": ["A", "B", "C"],
-    "selected": "A"
-  },
-  {
-    "type": "textInput",
-    "inputId": "text1",
-    "label": "Enter some text",
-    "value": ""
+    "choices": {
+      "option1": "Option 1",
+      "option2": "Option 2",
+      "option3": "Option 3"
+    }
   }
 ]

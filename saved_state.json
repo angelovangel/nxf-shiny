@@ -1,8 +1,13 @@
 [
   {
-    "inputId": "plot_type",
+    "inputId": "upload_ref",
+    "type": "fileInput",
+    "user_value": {}
+  },
+  {
+    "inputId": "select",
     "type": "selectInput",
-    "user_value": "Scatter"
+    "user_value": "option1"
   },
   {
     "inputId": "advanced",
@@ -13,10 +18,5 @@
     "inputId": "bins",
     "type": "sliderInput",
     "user_value": 30
-  },
-  {
-    "inputId": "obs",
-    "type": "sliderInput",
-    "user_value": 29
   }
 ]

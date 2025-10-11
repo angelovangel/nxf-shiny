@@ -1,0 +1,6 @@
+
+  {
+    "fastq": "demo/samples",
+    "ref": "demo/reference.gbk",
+    "format": "genbank"
+  }

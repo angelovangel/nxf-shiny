@@ -9,7 +9,6 @@ create_input <- function(params) {
   params$type <- NULL
   params$panel_condition <- NULL
   
-  # CRITICAL FIX: Unlist all parameters to ensure they are atomic vectors (numbers, strings, logicals)
   # This prevents arguments from being passed as lists/data.frames, which causes the match.arg error.
   params <- lapply(params, unlist)
   
@@ -52,7 +51,7 @@ ui <- page_navbar(
     plotOutput("my_plot"),
     h4("Saved State JSON Preview:"),
     verbatimTextOutput("save_preview")
-    ) # Show the resulting JSON
+    ) 
   )
 )
 
