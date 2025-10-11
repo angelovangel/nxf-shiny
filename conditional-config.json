@@ -1,0 +1,36 @@
+[
+  {
+    "type": "selectInput",
+    "inputId": "plot_type",
+    "label": "Choose a Plot Type:",
+    "choices": ["Histogram", "Scatter"],
+    "selected": "Histogram"
+  },
+  
+  {
+    "type": "checkboxInput",
+    "inputId": "advanced",
+    "label": "Advanced",
+    "value": false
+  },
+  
+  {
+    "type": "sliderInput",
+    "inputId": "bins",
+    "label": "Number of Bins:",
+    "min": 1,
+    "max": 50,
+    "value": 30,
+    "panel_condition": "input.advanced"
+  },
+  
+  {
+    "type": "sliderInput",
+    "inputId": "obs",
+    "label": "Number of Observations:",
+    "min": 1,
+    "max": 100,
+    "value": 50,
+    "panel_condition": "input.plot_type == 'Scatter'"
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "inputId": "plot_type",
+    "type": "selectInput",
+    "user_value": "Scatter"
+  },
+  {
+    "inputId": "advanced",
+    "type": "checkboxInput",
+    "user_value": false
+  },
+  {
+    "inputId": "bins",
+    "type": "sliderInput",
+    "user_value": 30
+  },
+  {
+    "inputId": "obs",
+    "type": "sliderInput",
+    "user_value": 29
+  }
+]
