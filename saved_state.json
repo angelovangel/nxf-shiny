@@ -1,22 +1,7 @@
-[
-  {
-    "inputId": "upload_ref",
-    "type": "fileInput",
-    "user_value": {}
-  },
-  {
-    "inputId": "select",
-    "type": "selectInput",
-    "user_value": "option1"
-  },
-  {
-    "inputId": "advanced",
-    "type": "checkboxInput",
-    "user_value": false
-  },
-  {
-    "inputId": "bins",
-    "type": "sliderInput",
-    "user_value": 30
-  }
-]
+{
+  "fastq": "/var/folders/ry/zd561vbd6d31wsvtyzmy2vf40000gn/T//Rtmpc8bL6n/e92f04881f9599706c1b24f2/0.gz",
+  "ref": "/var/folders/ry/zd561vbd6d31wsvtyzmy2vf40000gn/T//Rtmpc8bL6n/07221288802c6d99278e7a97/0.gbk",
+  "format": "genbank",
+  "advanced": false,
+  "variants": false
+}

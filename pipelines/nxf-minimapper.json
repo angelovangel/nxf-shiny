@@ -1,0 +1,48 @@
+[
+  {
+    "type": "fileInput",
+    "inputId": "fastq",
+    "label": "Fastq",
+    "multiple": true,
+    "accept": [".fasta", ".gz", "fq"],
+    "placeholder": "fastq file(s)"
+  },
+  
+   {
+    "type": "fileInput",
+    "inputId": "ref",
+    "label": "Upload reference",
+    "multiple": false,
+    "accept": [".fa", ".fasta", ".dna", ".gbk", ".genbank", ".embl"],
+    "placeholder": "reference"
+  },
+  
+  {
+    "type": "selectInput",
+    "inputId": "format",
+    "label": "Reference format",
+    "multiple": false,
+    "choices": {
+      "Fasta": "fasta",
+      "Genbank": "genbank",
+      "EMBL": "embl",
+      "Snapgene": "snapgene"
+    }
+  },
+  
+  {
+    "type": "checkboxInput",
+    "inputId": "advanced",
+    "label": "Advanced",
+    "value": false
+  },
+  
+  {
+    "type": "checkboxInput",
+    "inputId": "variants",
+    "label": "Include variants",
+    "value": false,
+    "panel_condition": "input.advanced"
+  }
+  
+]
