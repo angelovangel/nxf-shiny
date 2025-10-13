@@ -1,7 +1,6 @@
 {
   "samplesheet": {},
-  "fastq": "//bin",
-  "test": "//Users/angeloas/20250805-090623-samplesheet.csv",
+  "fastq": [],
   "outdir": "output",
   "pipeline": "wf-clone-validation"
 }

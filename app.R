@@ -1,6 +1,7 @@
 library(shiny)
 library(jsonlite)
 library(bslib)
+library(bsicons)
 library(stringr)
 library(dplyr)
 library(shinyvalidate)
@@ -8,6 +9,7 @@ library(shinyFiles)
 library(processx)
 library(digest)
 library(hover)
+library(reactable)
 
 source('global.R')
 
@@ -27,27 +29,58 @@ sidebar <- sidebar(
 )
 ui <- page_navbar(
   use_hover(),
+  
+  fillable = F,
+  title = tags$span(
+    tags$span(
+      "NXF - Shiny",
+      style = "font-size: 1.3rem; font-weight: bold; margin-left: 0em; color: #0073b7;"
+    ),
+    tags$span(
+      #icon('align-center'),
+      "Run any Nextflow pipeline using a JSON params spec file",
+      tags$a(
+        href = "https://github.com/angelovangel/nxf-shiny",
+        target = "_blank",
+        #rel="noopener noreferrer",
+        bs_icon('github')
+      ),
+      style = "font-size: 0.9rem; font-weight: normal; margin-left: 8em; color: #0073b7;"
+    )
+  ),
   sidebar = sidebar,
   theme = bs_theme(bootswatch = 'yeti', primary = '#196F3D'),
   ########## controls
   tags$div(
-    hover_action_button('start', 'Start', icon = icon('play'), button_animation = 'icon-fade'),
-    #actionButton("run", "Run pipeline"),
-    #actionButton('stop', 'Stop')
-    hover_action_button('reset', 'Reset', icon = icon('rotate'), button_animation = 'icon-fade')
+    hover_action_button('start', 'Start', icon = icon('play'), button_animation = 'overline-reveal'),
+    hover_action_button('show_session', 'Show session', icon = icon('expand'), button_animation = 'overline-reveal'),
+    hover_reload_button('reset', 'Reset', icon = icon('rotate'), button_animation = 'overline-reveal'),
+    hover_action_button('kill', 'Kill session', icon = icon('xmark'), style = 'color:#0073b7;', button_animation = 'overline-reveal'),
   ),
   tags$hr(),
   ########## controls
   card(
-    card_header('Pipeline runs'),
+    card_header(
+      id = 'header1', 
+      class = 'bg-secondary', 
+      tags$a('Sessions', tooltip(bsicons::bs_icon("question-circle"), 'Currently active tmux sessions'))
+    ),
+    max_height = 280,
     card_body(
-    h4("Saved State JSON Preview:"),
-    verbatimTextOutput("save_preview")
-    ) 
+      #reactableOutput('table')
+      verbatimTextOutput('table')
+    )
   ),
   card(
-    card_header("Selected pipeline output"),
-    verbatimTextOutput('stdout')
+    card_header(
+      id = 'header2', 
+      class = 'bg-secondary', 
+      tags$a('Session output', tooltip(bsicons::bs_icon("question-circle"), 'Output from the selected tmux session'))
+    ),
+    height = 450,
+    card_body(
+      verbatimTextOutput('stdout')
+    )
   )
 )
 
@@ -150,7 +183,7 @@ server <- function(input, output, session) {
   })
   
   # --- Display the saved JSON ---
-  output$save_preview <- renderPrint({
+  output$table <- renderPrint({
     cat(saved_json_state())
   })
   

@@ -17,16 +17,6 @@
     "required": true
   },
   
-  {
-    "type": "shinyFilesButton",
-    "inputId": "test",
-    "id": "test",
-    "label": "Select test file",
-    "title": "",
-    "multiple": false,
-    "required": true
-  },
-  
    {
     "type": "textInput",
     "inputId": "outdir",
