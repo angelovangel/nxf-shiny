@@ -1,7 +1,7 @@
 {
-  "fastq": "/var/folders/ry/zd561vbd6d31wsvtyzmy2vf40000gn/T//Rtmpc8bL6n/e92f04881f9599706c1b24f2/0.gz",
-  "ref": "/var/folders/ry/zd561vbd6d31wsvtyzmy2vf40000gn/T//Rtmpc8bL6n/07221288802c6d99278e7a97/0.gbk",
-  "format": "genbank",
+  "fastq": "/var/folders/cy/xfqdqgvs2mn43hxw_ldk_mfslvntxp/T//Rtmpp4eSYv/3ac5f1561874cd179899ed94/0.gz",
+  "ref": "/var/folders/cy/xfqdqgvs2mn43hxw_ldk_mfslvntxp/T//Rtmpp4eSYv/a2c3b11ead36d3128b86d781/0.gbk",
+  "format": "fasta",
   "advanced": false,
   "variants": false
 }

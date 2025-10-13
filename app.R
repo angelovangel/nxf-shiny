@@ -2,75 +2,80 @@ library(shiny)
 library(jsonlite)
 library(bslib)
 library(stringr)
+library(shinyvalidate)
 
-create_input <- function(params) {
-  input_type <- params$type
-  
-  # Remove keys not relevant to the Shiny function call
-  params$type <- NULL
-  params$panel_condition <- NULL
-  
-  # This prevents arguments from being passed as lists/data.frames, which causes the match.arg error.
-  params <- lapply(params, unlist)
-  
-  # The value for a select input's 'choices' and 'selected' might still need special handling
-  # depending on how jsonlite parsed the original config, but unlist often resolves it.
-  
-  do.call(input_type, params)
-}
-
-# Function to wrap conditional inputs in conditionalPanel()
-create_conditional_ui <- function(config) {
-  lapply(config, function(params) {
-    if (!is.null(params$panel_condition)) {
-      # This input is conditional, wrap it in conditionalPanel
-      conditionalPanel(
-        condition = params$panel_condition,
-        create_input(params)
-      )
-    } else {
-      # This input is not conditional, render it directly
-      create_input(params)
-    }
-  })
-}
+source('global.R')
 
 sidebar <- sidebar(
   tagList(
-    #selectInput('pipelines', 'Pipelines', choices = list.files('pipelines'), multiple = FALSE),
+    #This create the dropdown list with available pipelines, the config.json is maintained manually
     create_conditional_ui(jsonlite::fromJSON("config.json", simplifyDataFrame = FALSE)),
+
+    # these are the inputs loaded from the corresponding pipelines/json file
     uiOutput('pipeline_inputs'),
-    actionButton("save_state", "Save Current Configuration to JSON"),
+    
   )
 )
 ui <- page_navbar(
   sidebar = sidebar,
   theme = bs_theme(bootswatch = 'yeti', primary = '#196F3D'),
+  ########## controls
+  tags$div(
+  actionButton("run", "Run pipeline"),
+  actionButton('stop', 'Stop')
+  ),
+  tags$hr(),
+  ########## controls
   card(
-    card_header(
-      'header'
-    ),
+    card_header('Pipeline runs'),
     card_body(
-    plotOutput("my_plot"),
     h4("Saved State JSON Preview:"),
     verbatimTextOutput("save_preview")
     ) 
+  ),
+  card(
+    card_header("Selected pipeline output"),
+    verbatimTextOutput('stdout')
   )
 )
 
 server <- function(input, output, session) {
+  
   # render pipeline inputs based on pipeline selected
   output$pipeline_inputs <- renderUI({
     json <- read_json(path = fs::path('pipelines', input$pipelines), simplifyDataFrame = FALSE)
     create_conditional_ui(json)
   })
   
+  json <- reactive({
+    read_json(path = fs::path('pipelines', input$pipelines), simplifyDataFrame = FALSE)
+  })
+  iv <- InputValidator$new()
+  
+  observe({
+    # 1. Clear any previously added rules from the old pipeline configuration
+    #iv$clear_all_rules() 
+    
+    lapply(json(), function(p){
+      if (p$required) {
+        iv$add_rule(p$inputId, sv_required())
+      }
+    })
+  })
   
   # Reactive value to store the JSON string for display
   saved_json_state <- reactiveVal("")
   
   # --- Logic to save the input state ---
-  observeEvent(input$save_state, {
+  observeEvent(input$run, {
+    
+    iv$enable()
+    # Check if all inputs are valid before proceeding
+    if (!iv$is_valid()) {
+      showNotification("Please correct the required fields!", type = "warning")
+      # Stop the rest of the execution
+      return() 
+    }
     
     # Load the original configuration file once (using a reactiveVal or simple variable)
     config_data_list <- read_json(path = fs::path('pipelines', input$pipelines), simplifyDataFrame = FALSE)
