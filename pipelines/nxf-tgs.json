@@ -1,6 +1,47 @@
-
+[
   {
-    "fastq": "demo/samples",
-    "ref": "demo/reference.gbk",
-    "format": "genbank"
+    "type": "fileInput",
+    "inputId": "samplesheet",
+    "label": "Samplesheet",
+    "required": true,
+    "multiple": false,
+    "accept": [".csv", ".xlsx"],
+    "placeholder": "Upload samplesheet"
+  },
+  {
+    "type": "shinyDirButton",
+    "inputId": "fastq",
+    "id": "fastq",
+    "label": "Select fastq_pass folder",
+    "title": "",
+    "required": true
+  },
+  
+  {
+    "type": "shinyFilesButton",
+    "inputId": "test",
+    "id": "test",
+    "label": "Select test file",
+    "title": "",
+    "multiple": false,
+    "required": true
+  },
+  
+   {
+    "type": "textInput",
+    "inputId": "outdir",
+    "label": "Output directory",
+    "required": false,
+    "value": "output"
+  },
+  
+  {
+    "type": "selectInput",
+    "inputId": "pipeline",
+    "label": "epi2me workflow",
+    "required": true,
+    "multiple": false,
+    "choices": ["wf-clone-validation", "wf-bacterial-genomes", "wf-amplicon", "report-only"]
   }
+  
+]

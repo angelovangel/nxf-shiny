@@ -2,14 +2,23 @@ library(shiny)
 library(jsonlite)
 library(bslib)
 library(stringr)
+library(dplyr)
 library(shinyvalidate)
+library(shinyFiles)
+library(processx)
+library(digest)
+library(hover)
 
 source('global.R')
 
 sidebar <- sidebar(
+  #title = '',
   tagList(
-    #This create the dropdown list with available pipelines, the config.json is maintained manually
-    create_conditional_ui(jsonlite::fromJSON("config.json", simplifyDataFrame = FALSE)),
+    tags$div(
+      #style = "background-color:powderblue;",
+      #This create the dropdown list with available pipelines, the config.json is maintained manually
+      create_conditional_ui(jsonlite::fromJSON("config.json", simplifyDataFrame = FALSE))
+    ),
 
     # these are the inputs loaded from the corresponding pipelines/json file
     uiOutput('pipeline_inputs'),
@@ -17,12 +26,15 @@ sidebar <- sidebar(
   )
 )
 ui <- page_navbar(
+  use_hover(),
   sidebar = sidebar,
   theme = bs_theme(bootswatch = 'yeti', primary = '#196F3D'),
   ########## controls
   tags$div(
-  actionButton("run", "Run pipeline"),
-  actionButton('stop', 'Stop')
+    hover_action_button('start', 'Start', icon = icon('play'), button_animation = 'icon-fade'),
+    #actionButton("run", "Run pipeline"),
+    #actionButton('stop', 'Stop')
+    hover_action_button('reset', 'Reset', icon = icon('rotate'), button_animation = 'icon-fade')
   ),
   tags$hr(),
   ########## controls
@@ -40,25 +52,31 @@ ui <- page_navbar(
 )
 
 server <- function(input, output, session) {
-  
-  # render pipeline inputs based on pipeline selected
-  output$pipeline_inputs <- renderUI({
-    json <- read_json(path = fs::path('pipelines', input$pipelines), simplifyDataFrame = FALSE)
-    create_conditional_ui(json)
-  })
-  
+  # which pipeline
   json <- reactive({
     read_json(path = fs::path('pipelines', input$pipelines), simplifyDataFrame = FALSE)
   })
+  
+  # render pipeline inputs based on pipeline selected
+  output$pipeline_inputs <- renderUI({
+    create_conditional_ui(json())
+  })
+  
+  # special case shinyFiles - shinyDirChoose bindings in server
+  #shinyDirChoose(input, 'fastq', root=c(root=Sys.getenv('HOME')))
+  observeEvent(input$pipelines, {
+    bind_shinyfiles(input = input, config = json())
+  })
+  
+  
+  # Validations
   iv <- InputValidator$new()
   
   observe({
-    # 1. Clear any previously added rules from the old pipeline configuration
-    #iv$clear_all_rules() 
     
     lapply(json(), function(p){
       if (p$required) {
-        iv$add_rule(p$inputId, sv_required())
+        iv$add_rule(p$inputId, sv_required(message = 'Parameter is required!'))
       }
     })
   })
@@ -67,15 +85,15 @@ server <- function(input, output, session) {
   saved_json_state <- reactiveVal("")
   
   # --- Logic to save the input state ---
-  observeEvent(input$run, {
+  observeEvent(input$start, {
     
-    iv$enable()
-    # Check if all inputs are valid before proceeding
-    if (!iv$is_valid()) {
-      showNotification("Please correct the required fields!", type = "warning")
-      # Stop the rest of the execution
-      return() 
-    }
+    #iv$enable()
+    # # Check if all inputs are valid before proceeding
+    # if (!iv$is_valid()) {
+    #   showNotification("Please correct the required fields!", type = "warning")
+    #   # Stop the rest of the execution
+    #   return() 
+    # }
     
     # Load the original configuration file once (using a reactiveVal or simple variable)
     config_data_list <- read_json(path = fs::path('pipelines', input$pipelines), simplifyDataFrame = FALSE)
@@ -92,10 +110,20 @@ server <- function(input, output, session) {
       # Use isolate() to ensure this code only runs when the button is clicked,
       # not when the input values change.
       current_value <- isolate(input[[id]]) 
+      
+      ########################################
       # take only datapath for fileInputs
       if(config_item$type == 'fileInput') {
         current_value <- isolate(input[[id]]$datapath)
+      
+      # shinyFiles cases
+      } else if (config_item$type == 'shinyDirButton') {
+        current_value <- parseDirPath(roots = c(wd = "/"), selection = input[[id]])
+      } else if (config_item$type == 'shinyFilesButton') {
+        parsed_file <- parseFilePaths(roots = c(wd = "/"), selection = input[[id]])
+        current_value <- parsed_file$datapath
       }
+      ########################################
       
       # 4. Construct the output object for this input, note setNames
       output_item <- setNames(list(id = current_value),id)

@@ -33,5 +33,19 @@ create_conditional_ui <- function(config) {
   })
 }
 
+# in case there are shinyFiles params, make the required bindings in server
+# that is shinyDirChoose(input, 'fastq_pass', root=c(root=Sys.getenv('HOME')), session = session)
 
+bind_shinyfiles <- function(config, input) {
+  # which params are shinyDirButton or shinyFilesButton, get their id and return shinyDirChoose(input, id, ...)
+  lapply(config, function(p){
+    if (str_detect(string = p$type, pattern = "shinyDirButton")) {
+      shinyDirChoose(input, p$inputId, roots = c(wd = "/"), allowDirCreate = FALSE)
+    } else if (str_detect(string = p$type, pattern = "shinyFilesButton")) {
+      shinyFileChoose(input, p$inputId, roots = c(wd = "/"))
+    } else {
+      return()
+    }
+  })
+}
 
