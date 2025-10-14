@@ -85,6 +85,14 @@ ui <- page_navbar(
 )
 
 server <- function(input, output, session) {
+  # check nextflow, docker and tmux are on path
+  if (!bin_on_path('nextflow') | !bin_on_path('docker') | !bin_on_path('tmux')) {
+    showNotification('nextflow and/or docker and/or tmux not found!', type = 'error')
+  } else {
+    showNotification('The server is ready!', type = 'message')
+  }
+  
+  
   # which pipeline
   json <- reactive({
     read_json(path = fs::path('pipelines', input$pipelines), simplifyDataFrame = FALSE)

@@ -1,6 +1,7 @@
 {
-  "samplesheet": {},
-  "fastq": [],
-  "outdir": "output",
-  "pipeline": "wf-clone-validation"
+  "fastq": {},
+  "ref": {},
+  "format": "fasta",
+  "advanced": false,
+  "variants": false
 }
