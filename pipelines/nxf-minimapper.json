@@ -6,7 +6,8 @@
     "required": true,
     "multiple": true,
     "accept": [".fasta", ".gz", "fq"],
-    "placeholder": "fastq file(s)"
+    "placeholder": "fastq file(s)",
+    "help": "fastq files to be mapped to the reference"
   },
   
    {
@@ -16,7 +17,8 @@
     "required": true,
     "multiple": false,
     "accept": [".fa", ".fasta", ".dna", ".gbk", ".genbank", ".embl"],
-    "placeholder": "reference"
+    "placeholder": "reference",
+    "help": "Reference sequence file, containing one sequence record"
   },
   
   {
@@ -30,9 +32,9 @@
       "Genbank": "genbank",
       "EMBL": "embl",
       "Snapgene": "snapgene"
-    }
+    },
+    "help": "File format of reference"
   },
-  
   {
     "type": "checkboxInput",
     "inputId": "advanced",
@@ -40,13 +42,28 @@
     "required": false,
     "value": false
   },
-  
   {
     "type": "checkboxInput",
     "inputId": "variants",
     "label": "Include variants",
     "required": false,
     "value": false,
+    "panel_condition": "input.advanced"
+  },
+  {
+    "type": "textInput",
+    "inputId": "outdir",
+    "label": "Output directory",
+    "required": false,
+    "value": "output",
+    "panel_condition": "input.advanced"
+  },
+  {
+    "type": "textInput",
+    "inputId": "minimap_args",
+    "label": "Additional minimap2 args",
+    "required": false,
+    "value": "",
     "panel_condition": "input.advanced"
   }
   

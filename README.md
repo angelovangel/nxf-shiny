@@ -9,10 +9,20 @@ Shiny inputs. This file is placed unde `pipelines`
 
 ### JSON files
 The pipeline parameters JSON describes the Shiny inputs needed and correspond to the pipeline parameters.
-Example for file and select input:
+Example for file input:
 ```json
 [
 {
+    "type": "fileInput",// <--- this is the type of Shiny input to generate
+    "inputId": "fastq", // <--- this is the name of the nextflow pipeline param
+    "label": "Fastq",   // <--- Shiny input param
+    "required": true,   // <--- Shiny input param
+    "multiple": true,   // <--- Shiny input param
+    "accept": [".fasta", ".gz", "fq"], // <--- Shiny input param
+    "placeholder": "fastq file(s)",   // <--- Shiny input param
+    "help": "help text" // <--- not a Shiny input param
+  }, 
+  {
     "type": "fileInput",
     "inputId": "ref",
     "label": "Upload reference",
@@ -20,31 +30,22 @@ Example for file and select input:
     "multiple": false,
     "accept": [".fa", ".fasta", ".dna", ".gbk", ".genbank", ".embl"],
     "placeholder": "reference"
-  },
-  {
-    "type": "selectInput",
-    "inputId": "format",
-    "label": "Reference format",
-    "required": false,
-    "multiple": false,
-    "choices": {
-      "Fasta": "fasta",
-      "Genbank": "genbank",
-      "EMBL": "embl",
-      "Snapgene": "snapgene"
-    }
   }
 ]
 ```
-The keys correspond to the Shiny input objects.
-The `inputId` corresponds to the extflow parameter name, and the value provided by the user is passed to nextflow.
+The keys correspond to the parameters of the Shiny input objects.
+The `inputId` corresponds to the Nextflow parameter name, and the value provided by the user is passed to nextflow.
 For the above example, this is given to nextflow as:
 ```
 nextflow run pipeline --fastq path/to/file --format fasta ...
 ```
-> Some JSON keys are not used in Shiny input generation, but for conditional display or treat them as required. These are:
+### Supported Shiny input types
+All Shiny input types can be used - https://shiny.posit.co/r/getstarted/build-an-app/reactive-flow/ui-inputs.html
+
+> Some JSON keys are not used in Shiny input generation, but for conditional display or help text. These are:
 > - `panel_condition`
 > - `required`
+> - `help`
 
 ### Add a new pipeline
 The steps to add a new nextflow pipeline for use with this Shiny app:

@@ -93,7 +93,7 @@ server <- function(input, output, session) {
   }
   
   
-  # which pipeline
+  # currently selected pipeline
   json <- reactive({
     read_json(path = fs::path('pipelines', input$pipelines), simplifyDataFrame = FALSE)
   })
@@ -136,14 +136,12 @@ server <- function(input, output, session) {
     #   return() 
     # }
     
-    # Load the original configuration file once (using a reactiveVal or simple variable)
-    config_data_list <- read_json(path = fs::path('pipelines', input$pipelines), simplifyDataFrame = FALSE)
     
     # 1. Initialize an empty list to store the final state
     final_state_list <- list()
     
     # 2. Iterate through the original configuration items
-    for (config_item in config_data_list) {
+    for (config_item in json()) {
       
       id <- config_item$inputId
       
@@ -177,7 +175,7 @@ server <- function(input, output, session) {
     json_output <- jsonlite::toJSON(
       final_state_list, 
       pretty = TRUE, 
-      auto_unbox = TRUE
+      auto_unbox = TRUE, na = "string", null = 'null'
     )
     
     # 7. Write the JSON string to a file (e.g., 'saved_state.json')

@@ -8,17 +8,33 @@ bin_on_path = function(bin) {
 create_input <- function(param) {
   input_type <- param$type
   
+  # add help icons to label
+  # tags$a('Sessions', tooltip(bsicons::bs_icon("question-circle"), 'Currently active tmux sessions'))
+  if (!is.null(param$help)) {
+    label <- tags$a(
+        param$label, 
+        tooltip(
+          bsicons::bs_icon("question-circle"),
+          param$help,
+          placement = "right")
+      )
+    
+    param$label <- HTML(as.character(label))
+    #param$label <- "Test"
+  }
+  
+  # This prevents arguments from being passed as lists/data.frames, which causes the match.arg error.
+  param <- lapply(param, unlist)
+  # The value for a select input's 'choices' and 'selected' might still need special handling
+  # depending on how jsonlite parsed the original config, but unlist often resolves it.
+  
   # Remove keys not relevant to the Shiny function call, these are documented in the README.md
   param$type <- NULL
   param$panel_condition <- NULL
   param$required <- NULL
+  param$help <- NULL
   
-  # This prevents arguments from being passed as lists/data.frames, which causes the match.arg error.
-  param <- lapply(param, unlist)
-  
-  # The value for a select input's 'choices' and 'selected' might still need special handling
-  # depending on how jsonlite parsed the original config, but unlist often resolves it.
-  
+  # make shiny input
   do.call(input_type, param)
 }
 
