@@ -1,4 +1,17 @@
 
+# write nextflow log table to csv
+write_nxf_status <- function(file) {
+  log <- system2('nextflow', args = 'log', stdout = T, stderr = T)
+  if (length(log) < 2) {
+    write.csv(data.frame(COMMAND = NA, DURATION = NA, STATUS = NA), file = file) 
+  } else {
+    logt <- read.table(text = log, header = T, sep = "\t")
+    write.csv(logt, file = file)  
+  }
+}
+
+
+
 bin_on_path = function(bin) {
   exit_code = suppressWarnings(system2("command", args = c("-v", bin), stdout = FALSE))
   return(exit_code == 0)
@@ -24,7 +37,7 @@ create_input <- function(param) {
   }
   
   # This prevents arguments from being passed as lists/data.frames, which causes the match.arg error.
-  param <- lapply(param, unlist)
+  # param <- lapply(param, unlist)
   # The value for a select input's 'choices' and 'selected' might still need special handling
   # depending on how jsonlite parsed the original config, but unlist often resolves it.
   
@@ -68,5 +81,16 @@ bind_shinyfiles <- function(config, input) {
       return()
     }
   })
+}
+
+# Helper to check if pipeline is finished, based on the tmux_sessions() df
+pipeline_finished <- function(id, df) {
+  status_val <- df[df$session_id == id, ]$status
+  if (length(status_val) > 0 && !is.na(status_val) && str_detect(status_val, 'OK')) {
+    TRUE
+  } else {
+    FALSE
+  }
+  #file.exists(file.path("output", session_id, "00-sample-status-summary.html"))
 }
 

@@ -1,27 +1,30 @@
-[
-  {
-    "type": "fileInput",
+{
+  "name": "nxf-minimapper",
+  "fullname": "angelovangel/nxf-minimapper",
+  "url": "https://github.com/angelovangel/nxf-minimapper",
+  "shiny_inputs":
+  [
+    {
+    "type": "shinyDirButton",
     "inputId": "fastq",
-    "label": "Fastq",
-    "required": true,
-    "multiple": true,
-    "accept": [".fasta", ".gz", "fq"],
-    "placeholder": "fastq file(s)",
-    "help": "fastq files to be mapped to the reference"
-  },
+    "id": "fastq",
+    "label": "Fastq folder",
+    "title": "Select folder containing fastq files",
+    "required": true
+    },
   
-   {
-    "type": "fileInput",
+    {
+    "type": "shinyFilesButton",
     "inputId": "ref",
-    "label": "Upload reference",
-    "required": true,
+    "id": "ref",
+    "label": "Reference file",
+    "title": "Select reference file",
     "multiple": false,
-    "accept": [".fa", ".fasta", ".dna", ".gbk", ".genbank", ".embl"],
-    "placeholder": "reference",
-    "help": "Reference sequence file, containing one sequence record"
-  },
+    "required": true,
+    "help": "Path to reference sequence file, containing one sequence record"
+    },
   
-  {
+    {
     "type": "selectInput",
     "inputId": "format",
     "label": "Reference format",
@@ -32,39 +35,31 @@
       "Genbank": "genbank",
       "EMBL": "embl",
       "Snapgene": "snapgene"
-    },
+      },
     "help": "File format of reference"
-  },
-  {
+    },
+    {
     "type": "checkboxInput",
     "inputId": "advanced",
     "label": "Advanced",
     "required": false,
     "value": false
-  },
-  {
+    },
+    {
     "type": "checkboxInput",
     "inputId": "variants",
     "label": "Include variants",
     "required": false,
     "value": false,
     "panel_condition": "input.advanced"
-  },
-  {
-    "type": "textInput",
-    "inputId": "outdir",
-    "label": "Output directory",
-    "required": false,
-    "value": "output",
-    "panel_condition": "input.advanced"
-  },
-  {
+    },
+    {
     "type": "textInput",
     "inputId": "minimap_args",
     "label": "Additional minimap2 args",
     "required": false,
     "value": "",
     "panel_condition": "input.advanced"
-  }
-  
-]
+    }
+  ]
+}

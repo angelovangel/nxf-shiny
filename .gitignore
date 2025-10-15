@@ -50,5 +50,6 @@ rsconnect/
 
 .nextflow*
 work
+www
 output
 .DS_Store

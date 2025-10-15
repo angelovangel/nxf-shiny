@@ -1,3 +1,8 @@
+{
+  "name": "nxf-tgs",
+  "fullname": "angelovangel/nxf-tgs",
+  "url": "https://github.com/angelovangel/nxf-tgs",
+  "shiny_inputs":
 [
   {
     "type": "fileInput",
@@ -17,14 +22,6 @@
     "required": true
   },
   
-   {
-    "type": "textInput",
-    "inputId": "outdir",
-    "label": "Output directory",
-    "required": false,
-    "value": "output"
-  },
-  
   {
     "type": "selectInput",
     "inputId": "pipeline",
@@ -35,3 +32,5 @@
   }
   
 ]
+  
+}
