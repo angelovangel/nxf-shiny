@@ -1,4 +1,16 @@
 
+
+# Helper to check if pipeline is finished, based on the tmux_sessions() df
+pipeline_finished <- function(id, df) {
+  status_val <- df[df$session_id == id, ]$status
+  if (length(status_val) > 0 && !is.na(status_val) && str_detect(status_val, 'OK')) {
+    TRUE
+  } else {
+    FALSE
+  }
+  #file.exists(file.path("output", session_id, "00-sample-status-summary.html"))
+}
+
 # return nextflow log table for a nextflow log in a specific folder
 nxf_log <- function(path) {
   
@@ -83,23 +95,13 @@ bind_shinyfiles <- function(config, input) {
   # which params are shinyDirButton or shinyFilesButton, get their id and return shinyDirChoose(input, id, ...)
   lapply(config, function(p){
     if (str_detect(string = p$type, pattern = "shinyDirButton")) {
-      shinyDirChoose(input, p$inputId, roots = c(wd = "/"), allowDirCreate = FALSE)
+      shinyDirChoose(input, p$inputId, roots = c(home = Sys.getenv('HOME')), allowDirCreate = FALSE)
     } else if (str_detect(string = p$type, pattern = "shinyFilesButton")) {
-      shinyFileChoose(input, p$inputId, roots = c(wd = "/"))
+      shinyFileChoose(input, p$inputId, roots = c(home = Sys.getenv('HOME')))
     } else {
       return()
     }
   })
 }
 
-# Helper to check if pipeline is finished, based on the tmux_sessions() df
-pipeline_finished <- function(id, df) {
-  status_val <- df[df$session_id == id, ]$status
-  if (length(status_val) > 0 && !is.na(status_val) && str_detect(status_val, 'OK')) {
-    TRUE
-  } else {
-    FALSE
-  }
-  #file.exists(file.path("output", session_id, "00-sample-status-summary.html"))
-}
 

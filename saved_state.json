@@ -1,9 +1,0 @@
-{
-  "fastq": null,
-  "ref": null,
-  "format": "fasta",
-  "advanced": false,
-  "variants": false,
-  "outdir": "output",
-  "minimap_args": ""
-}

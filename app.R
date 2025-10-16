@@ -185,12 +185,12 @@ server <- function(input, output, session) {
       # **MODIFIED LOGIC**
       if (input_type == 'shinyDirButton') {
         # Only parse if a selection has been made (path element exists)
-        parsed_dir <- parseDirPath(roots = c(wd = "/"), selection = current_value)
+        parsed_dir <- parseDirPath(roots = c(home = Sys.getenv('HOME')), selection = current_value)
         display_value <- parsed_dir[1] # Display only the path string
         
       } else if (input_type == 'shinyFilesButton') {  
         # Only parse if a selection has been made (files element exists)
-        parsed_file <- parseFilePaths(roots = c(wd = "/"), selection = current_value)
+        parsed_file <- parseFilePaths(roots = c(home = Sys.getenv('HOME')), selection = current_value)
         # Display only the datapath string (first selected file)
         display_value <- parsed_file$datapath[1] 
         
@@ -290,11 +290,13 @@ server <- function(input, output, session) {
         }
       })
       df$status <- as.character(df$status) # avoid a warning if status is not atomic
-      # df$pipeline_time = sapply(df$session_id, function(x) { nxf_info[str_detect(nxf_info$COMMAND, x), ]$DURATION })
-      # df$pipeline = sapply(df$session_id, function(x) {
-      #   command <- nxf_info[str_detect(nxf_info$COMMAND, x), ]$COMMAND
-      #   str_extract(command, "(?<=nextflow run\\s)\\S+") 
-      # }) 
+      df$pipeline_time = sapply(df$session_id, function(x) { nxflogs[[x]]$DURATION})
+      
+      df$pipeline = sapply(df$session_id, function(x) {
+        command <- nxflogs[[x]]$COMMAND
+        str_extract(command, "(?<=nextflow run\\s)\\S+")
+      })
+      
       df <- df %>% mutate(
         status = ifelse(str_detect(status, "-"), "RUNNING", status),
         tmux_time = prettyunits::pretty_dt(difftime(Sys.time(), started), compact = T)
@@ -306,7 +308,7 @@ server <- function(input, output, session) {
         tar_name <- paste0(id, ".tar.gz")
         tar_path <- file.path("www", tar_name)
         if (!is.na(id) && file.exists(tar_path)) {
-          paste0('<a href="', tar_name, '" download>Download ', id, '</a>')
+          paste0('<a href="', tar_name, '" download>', id, '</a>')
         } else {
           "NA"
         }
@@ -323,9 +325,6 @@ server <- function(input, output, session) {
   })
   row_selected <- row_sel %>% throttle(1000)
   
-  # session_selected <- reactive({
-  #   tmux_sessions()[row_selected(), ]$session_id
-  # })
   ##################################
   
   # Render and update tmux sessions table 
@@ -368,19 +367,18 @@ server <- function(input, output, session) {
       if (!is.na(id) && pipeline_finished(df = df, id = id)) {
         #if ( !is.na(id) && (df[df$session_id == id, ]$status == 'OK') ) {
         tar_path <- file.path("www", paste0(id, ".tar.gz"))
-        outdir <- file.path("output", id)
+        outdir <- fs::path("instances", id)
         if (!file.exists(tar_path) && dir.exists(outdir)) {
           # Create tarball in www folder
-          system2("tar", args = c("-czf", tar_path, "-C", "output", id))
+          system2("tar", args = c("-czf", tar_path, "--exclude='work'", "-C", "instances", id))
         }
       }
     }
   })
   ##################################
   
-  # Reactive value to store the JSON string for display
-  saved_json_state <- reactiveVal("")
-  # --- Logic to save the input state ---
+  
+  # --- Save the input state and start ---
   observeEvent(input$start, {
     
     session_id <- digest(runif(1), algo = 'crc32')
@@ -414,9 +412,9 @@ server <- function(input, output, session) {
       
       # shinyFiles cases
       } else if (config_item$type == 'shinyDirButton') {
-        current_value <- parseDirPath(roots = c(wd = "/"), selection = input[[id]])
+        current_value <- parseDirPath(roots = c(home = Sys.getenv('HOME')), selection = input[[id]])
       } else if (config_item$type == 'shinyFilesButton') {
-        parsed_file <- parseFilePaths(roots = c(wd = "/"), selection = input[[id]])
+        parsed_file <- parseFilePaths(roots = c(home = Sys.getenv('HOME')), selection = input[[id]])
         current_value <- parsed_file$datapath
       }
       
@@ -434,22 +432,18 @@ server <- function(input, output, session) {
       auto_unbox = TRUE, na = "string", null = 'null'
     )
     
-    # 7. Write the JSON string to a file (e.g., 'saved_state.json')
+    # 7. Fix the json to be read by nextflow
     json_to_write <- str_remove_all(json_output, "^\\[|\\]$")
     
-    saved_params_file <- tempfile(fileext = ".json")
-    write(json_to_write, saved_params_file)
-    
-    # Update the reactive value for display
-    saved_json_state(json_output)
-    
-    showNotification("Configuration state saved to 'saved_state.json'!", type = "message")
-    ############################################
+    # saved_params_file <- tempfile(fileext = ".json")
+    # write(json_to_write, saved_params_file)
     
     # Execute pipeline
     # 0. Make a folder for this run
     instance_path <- fs::path('instances', session_id)
     fs::dir_create(instance_path, recurse = T)
+    # write the json_params also to instances/session_id
+    write(json_to_write, file = fs::path(instance_path, 'params-file.json'))
     
     # 1. Launch new clean! tmux session
     args1 <- c('new', '-d', '-s', session_id, '-c', instance_path, '-x', '120', '-y', '30', "'bash --login'") # add 'bash --login' to prevent R from inheriting from previous tmux sessions?
@@ -458,7 +452,7 @@ server <- function(input, output, session) {
     # 2. Start pipeline in new session
     tmux_command <- paste(
       'nextflow', 'run', json()$fullname,
-      '-params-file', saved_params_file,
+      '-params-file', file.path(fs::path_abs(instance_path), 'params-file.json'),
       # '-o', file.path('output', session_id),
       # '-w', file.path('work', session_id), not needed, as there is an unique instance path
       sep = ' '
@@ -487,12 +481,47 @@ server <- function(input, output, session) {
       )
     },
     message = function(m) {
-      shinyjs::html(id = 'stdout', html = paste0('Session: ', tmux_sessions()[row_selected(), ]$session_id, '\n'), add = T);
+      #shinyjs::html(id = 'stdout', html = paste0('Session: ', tmux_sessions()[row_selected(), ]$session_id, '\n'), add = T);
       shinyjs::html(id = "stdout", html = m$message, add = T);
       #runjs("document.getElementById('stdout').parentElement.scrollTo(0,1e9);")
       runjs("document.getElementById('stdout').parentElement.scrollTo({ top: 1e9, behavior: 'smooth' });")
     }
     )
+  })
+  
+  # kill session (and delete data)
+  ############################################
+  observeEvent(input$kill, {
+    
+    session_selected <- tmux_sessions()[row_selected(), ]$session_id
+    
+    args <- paste0('kill-session -t ', session_selected)
+    if (!is.null(row_selected())) {
+      # kill session
+      system2('tmux', args = args)
+      
+      
+      # Remove tarball from www
+      tar_path <- fs::path("www", paste0(session_selected, ".tar.gz"))
+      if (file.exists(tar_path)) {
+        file.remove(tar_path)
+      }
+      
+      # Remove instance directory
+      instance <- fs::path("instances", session_selected)
+      if (dir.exists(instance)) {
+        unlink(instance, recursive = TRUE)
+      }
+      
+      # # Remove work directory
+      # outdir <- file.path("work", session_selected)
+      # if (dir.exists(outdir)) {
+      #   unlink(outdir, recursive = TRUE)
+      # }
+      showNotification(ui = paste0('Session ', session_selected, ' killed!'), type = 'message')
+    } else {
+      showNotification('Select session first!', type = 'error')
+    }  
   })
   
 }
