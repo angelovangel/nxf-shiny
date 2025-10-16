@@ -1,13 +1,22 @@
 
-# write nextflow log table to csv
-write_nxf_status <- function(file) {
-  log <- system2('nextflow', args = 'log', stdout = T, stderr = T)
-  if (length(log) < 2) {
-    write.csv(data.frame(COMMAND = NA, DURATION = NA, STATUS = NA), file = file) 
+# return nextflow log table for a nextflow log in a specific folder
+nxf_log <- function(path) {
+  
+  log <- processx::run('nextflow', 'log', wd = path, error_on_status = F)
+  if (log$status == 0) {
+    read.table(text = log$stdout, header = T, sep = '\t')
   } else {
-    logt <- read.table(text = log, header = T, sep = "\t")
-    write.csv(logt, file = file)  
+    data.frame(
+      TIMESTAMP = NA,
+      DURATION = NA,
+      RUN.NAME = NA,
+      STATUS = NA,
+      REVISION.ID = NA,
+      SESSION.ID = NA,
+      COMMAND = NA
+    )
   }
+  
 }
 
 

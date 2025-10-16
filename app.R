@@ -109,8 +109,8 @@ server <- function(input, output, session) {
     session_id = NA,
     pipeline = NA,
     started = NA,
-    runtime = NA,
-    pipeline_runtime = NA,
+    tmux_time = NA,
+    pipeline_time = NA,
     status = NA,
     results = NA
   )
@@ -128,16 +128,17 @@ server <- function(input, output, session) {
     read_json(path = fs::path('pipelines', input$pipelines), simplifyDataFrame = FALSE)
   })
   
-  # render pipeline inputs based on pipeline selected
-  output$pipeline_inputs <- renderUI({
-    create_conditional_ui(json()$shiny_inputs)
-  })
-  
   output$pipeline_url <- renderUI({
     HTML(
       paste0("<a href='", json()$url, "'target='_blank'>Pipeline repository</a>")
     )
   })
+  
+  # render pipeline inputs based on pipeline selected
+  output$pipeline_inputs <- renderUI({
+    create_conditional_ui(json()$shiny_inputs)
+  })
+  
   
   # special case shinyFiles - shinyDirChoose bindings in server
   #shinyDirChoose(input, 'fastq', root=c(root=Sys.getenv('HOME')))
@@ -145,6 +146,78 @@ server <- function(input, output, session) {
     bind_shinyfiles(input = input, config = json()$shiny_inputs)
   })
   
+  # Reactive Input Display on stdout ---
+  ##################################
+  #
+  current_inputs <- reactive({
+    
+    # 1. Get the IDs of the inputs for the currently selected pipeline
+    input_ids <- sapply(json()$shiny_inputs, function(p) p$inputId)
+    
+    # 2. Use a dummy dependency on all input values to trigger reactivity
+    # When any input value changes, this reactive will re-execute.
+    lapply(input_ids, function(id) input[[id]])
+    
+    # 3. Return the list of IDs (the actual values will be retrieved in the observer)
+    return(input_ids)
+  })
+  
+  # Observer to update the stdout panel with the current input values
+  # This will trigger whenever 'current_inputs' changes.
+  observeEvent(current_inputs(), {
+    
+    input_ids <- current_inputs() # Get the list of input IDs
+    input_config <- json()$shiny_inputs # Get the full config to check types
+    
+    # Create a string of the current input values
+    input_summary <- paste0("Selected pipeline: ", input$pipelines, "\n--- Current Input Values ---\n")
+    
+    for (id in input_ids) {
+      current_value <- input[[id]]
+      
+      # Find the configuration item for the current input ID
+      config_item <- input_config[sapply(input_config, function(x) x$inputId == id)][[1]]
+      input_type <- config_item$type
+      
+      # Initialize display_value with the raw input value
+      display_value <- paste(current_value, collapse = ", ")
+      
+      # **MODIFIED LOGIC**
+      if (input_type == 'shinyDirButton') {
+        # Only parse if a selection has been made (path element exists)
+        parsed_dir <- parseDirPath(roots = c(wd = "/"), selection = current_value)
+        display_value <- parsed_dir[1] # Display only the path string
+        
+      } else if (input_type == 'shinyFilesButton') {  
+        # Only parse if a selection has been made (files element exists)
+        parsed_file <- parseFilePaths(roots = c(wd = "/"), selection = current_value)
+        # Display only the datapath string (first selected file)
+        display_value <- parsed_file$datapath[1] 
+        
+      } else if (input_type == 'fileInput' && !is.null(current_value$datapath)) {
+        # Handle regular fileInput
+        display_value <- current_value$datapath
+      } 
+      
+      # Skip if the path is empty/not yet selected (e.g., character(0))
+      if (length(display_value) == 0 || is.na(display_value)) {
+        display_value <- ""
+      }
+      
+      input_summary <- paste0(
+        input_summary,
+        sprintf("%-20s: %s\n", id, display_value)
+      )
+    }
+    input_summary <- paste0(input_summary, "--------------------------\n")
+    
+    # Update the stdout VerbatimTextOutput.
+    runjs("document.getElementById('stdout').textContent = '';") # Clear content
+    shinyjs::html(id = "stdout", html = input_summary, add = T)
+    runjs("document.getElementById('stdout').parentElement.scrollTo({ top: 1e9, behavior: 'smooth' });")
+  })
+  
+  ##################################
   
   # Validations
   iv <- InputValidator$new()
@@ -158,23 +231,12 @@ server <- function(input, output, session) {
     })
   })
   
-  # NXF log
-  nxflog <- tempfile(fileext = ".csv")
-  reactive({
-    invalidateLater(3000, session = session)
-    write_nxf_status(nxflog)
-  })
-  
   # Monitor tmux sessions ##################################
   tmux_sessions <- reactive({
     invalidateLater(3000, session)
     oldw <- getOption("warn")
     options(warn = -1)
     tmuxinfo <- system2("bin/tmux-info.sh", stdout = TRUE, stderr = TRUE)
-    ### write nxf log
-    write_nxf_status(nxflog)
-    nxf_info <- read.csv(nxflog, header = T, check.names = T)
-    #################
     options(warn = oldw)
     
     if (any(str_detect(tmuxinfo, 'no server|error'))) {
@@ -184,17 +246,32 @@ server <- function(input, output, session) {
         session_id = str_split_i(tmuxinfo, " ", 2),
         pipeline = NA,
         started = str_split_i(tmuxinfo, " ", 1) %>% as.numeric() %>% as.POSIXct(),
-        runtime = NA,
-        pipeline_runtime = NA,
+        tmux_time = NA,
+        pipeline_time = NA,
         status = NA,
         results = NA
       )
       
       # add status etc from nxflog
-      # matching between tmux session id and nextflow run is the session id which is found in the COMMAND column
+      # Because every run is isolated in instances/session_id, nextflow log has to be run there to get nxf log data
+      # 1. Run nxf_log for all sessions in the df, collect results in a list of dataframes
+      nxflogs <- setNames(
+        lapply(df$session_id, function(x) {
+          path <- fs::path('instances', x)
+          if (fs::dir_exists(path)) {
+            nxf_log(path)
+          } else {
+            # Return a descriptive object for non-existent paths
+            data.frame(STATUS = "not found")
+          }
+        }),
+        df$session_id
+      )
+      
       df$status <- sapply(df$session_id, function(x) {
-        nxf_run_index <- which(str_detect(string = nxf_info$COMMAND, pattern = paste0(x, '$')))
-        status_info <- nxf_info[nxf_run_index[1], ]$STATUS
+        #nxflog <- nxf_log(fs::path('instances', x))
+        status_info <- nxflogs[[x]]$STATUS
+        
         # just formatting status
         if (is.na(status_info)) {
           status_info <- 'NA'
@@ -213,14 +290,14 @@ server <- function(input, output, session) {
         }
       })
       df$status <- as.character(df$status) # avoid a warning if status is not atomic
-      df$pipeline_runtime = sapply(df$session_id, function(x) { nxf_info[str_detect(nxf_info$COMMAND, x), ]$DURATION })
-      df$pipeline = sapply(df$session_id, function(x) {
-        command <- nxf_info[str_detect(nxf_info$COMMAND, x), ]$COMMAND
-        str_extract(command, "(?<=nextflow run\\s)\\S+") 
-      }) 
+      # df$pipeline_time = sapply(df$session_id, function(x) { nxf_info[str_detect(nxf_info$COMMAND, x), ]$DURATION })
+      # df$pipeline = sapply(df$session_id, function(x) {
+      #   command <- nxf_info[str_detect(nxf_info$COMMAND, x), ]$COMMAND
+      #   str_extract(command, "(?<=nextflow run\\s)\\S+") 
+      # }) 
       df <- df %>% mutate(
         status = ifelse(str_detect(status, "-"), "RUNNING", status),
-        runtime = prettyunits::pretty_dt(difftime(Sys.time(), started), compact = T)
+        tmux_time = prettyunits::pretty_dt(difftime(Sys.time(), started), compact = T)
       ) %>%
         arrange(started)
       
@@ -240,15 +317,15 @@ server <- function(input, output, session) {
   })
   # Monitor tmux sessions ##################################
   
-  # row and session selected  ##################################
+  # row and session selected  
   row_sel <- reactive({
-    getReactableState('table', 'selected')
+    getReactableState('table', 'selected', session = session)
   })
-  row_selected <- row_sel %>% debounce(1000)
+  row_selected <- row_sel %>% throttle(1000)
   
-  session_selected <- reactive({
-    tmux_sessions()[row_selected(), ]$session_id
-  })
+  # session_selected <- reactive({
+  #   tmux_sessions()[row_selected(), ]$session_id
+  # })
   ##################################
   
   # Render and update tmux sessions table 
@@ -267,7 +344,7 @@ server <- function(input, output, session) {
         started = colDef(format = colFormat(datetime = T, locales = 'en-GB'), minWidth = 150),
         pipeline = colDef(minWidth = 200),
         results = colDef(html = TRUE),
-        status = colDef(html = TRUE, minWidth = 50)
+        status = colDef(html = TRUE, minWidth = 80)
       )
     )
   })
@@ -308,13 +385,13 @@ server <- function(input, output, session) {
     
     session_id <- digest(runif(1), algo = 'crc32')
     
-    #iv$enable()
-    # # Check if all inputs are valid before proceeding
-    # if (!iv$is_valid()) {
-    #   showNotification("Please correct the required fields!", type = "warning")
-    #   # Stop the rest of the execution
-    #   return() 
-    # }
+    iv$enable()
+    # Check if all inputs are valid before proceeding
+    if (!iv$is_valid()) {
+      showNotification("Please correct the required fields!", type = "warning")
+      # Stop the rest of the execution
+      return()
+    }
     
     # Collect inputs to build -params-file json
     ############################################
@@ -370,16 +447,20 @@ server <- function(input, output, session) {
     ############################################
     
     # Execute pipeline
+    # 0. Make a folder for this run
+    instance_path <- fs::path('instances', session_id)
+    fs::dir_create(instance_path, recurse = T)
+    
     # 1. Launch new clean! tmux session
-    args1 <- c('new', '-d', '-s', session_id, '-x', '120', '-y', '30', "'bash --login'") # add 'bash --login' to prevent R from inheriting from previous tmux sessions?
+    args1 <- c('new', '-d', '-s', session_id, '-c', instance_path, '-x', '120', '-y', '30', "'bash --login'") # add 'bash --login' to prevent R from inheriting from previous tmux sessions?
     system2('tmux', args = args1)
     
     # 2. Start pipeline in new session
     tmux_command <- paste(
       'nextflow', 'run', json()$fullname,
       '-params-file', saved_params_file,
-      '-o', file.path('output', session_id),
-      '-w', file.path('work', session_id),
+      # '-o', file.path('output', session_id),
+      # '-w', file.path('work', session_id), not needed, as there is an unique instance path
       sep = ' '
     )
     
@@ -395,7 +476,7 @@ server <- function(input, output, session) {
     withCallingHandlers({
       shinyjs::html(id = "stdout", "")
       #args <- paste0(' a', ' -t ', session_selected)
-      args <- c('capture-pane', '-S', '-', '-E', '-', '-pt', session_selected())
+      args <- c('capture-pane', '-S', '-', '-E', '-', '-pt', tmux_sessions()[row_selected(), ]$session_id)
       
       p <- processx::run(
         'tmux', args = args,
@@ -406,7 +487,7 @@ server <- function(input, output, session) {
       )
     },
     message = function(m) {
-      shinyjs::html(id = 'stdout', html = paste0('Session: ', session_selected(), '\n'), add = T);
+      shinyjs::html(id = 'stdout', html = paste0('Session: ', tmux_sessions()[row_selected(), ]$session_id, '\n'), add = T);
       shinyjs::html(id = "stdout", html = m$message, add = T);
       #runjs("document.getElementById('stdout').parentElement.scrollTo(0,1e9);")
       runjs("document.getElementById('stdout').parentElement.scrollTo({ top: 1e9, behavior: 'smooth' });")
