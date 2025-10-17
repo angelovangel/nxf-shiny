@@ -66,6 +66,13 @@ ui <- page_navbar(
           color: #212529 !important; /* Force a dark text color (e.g., a standard dark Bootstrap color) */
           opacity: 1 !important;    /* Force full opacity */
         }
+        /* Custom style for a selected shinyFiles button */
+        .selected-file-button {
+          /* Example: A distinct background and border */
+          background-color: #d4edda !important; /* Light green */
+          border-color: #155724 !important;    /* Dark green */
+          color: #155724 !important;           /* Dark text */
+        }
       ")
     )
   ),
@@ -186,11 +193,33 @@ server <- function(input, output, session) {
       if (input_type == 'shinyDirButton') {
         # Only parse if a selection has been made (path element exists)
         parsed_dir <- parseDirPath(roots = c(home = Sys.getenv('HOME')), selection = current_value)
+        
+        # add/remove css class for better ui
+        if (is.list(current_value)) {
+          shinyjs::runjs(paste0(
+            "$('#", id, "').addClass('selected-file-button');"
+          ))
+        } else {
+          shinyjs::runjs(paste0(
+            "$('#", id, "').removeClass('selected-file-button');"
+          ))
+        }
         display_value <- parsed_dir[1] # Display only the path string
         
       } else if (input_type == 'shinyFilesButton') {  
         # Only parse if a selection has been made (files element exists)
         parsed_file <- parseFilePaths(roots = c(home = Sys.getenv('HOME')), selection = current_value)
+        
+        # add/remove css class for better ui
+        if (is.list(current_value)) {
+          shinyjs::runjs(paste0(
+            "$('#", id, "').addClass('selected-file-button');"
+          ))
+        } else {
+          shinyjs::runjs(paste0(
+            "$('#", id, "').removeClass('selected-file-button');"
+          ))
+        }
         # Display only the datapath string (first selected file)
         display_value <- parsed_file$datapath[1] 
         
