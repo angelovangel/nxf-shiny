@@ -7,7 +7,8 @@
     
     "choices": {
       "nxf-minimapper": "nxf-minimapper.json",
-      "nxf-tgs": "nxf-tgs.json"
+      "nxf-tgs": "nxf-tgs.json",
+      "epi2me-wf-alignment": "epi2me-wf-alignment.json"
     }
   }
 ]

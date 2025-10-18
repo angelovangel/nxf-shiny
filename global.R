@@ -43,9 +43,13 @@ create_input <- function(param) {
   input_type <- param$type
   
   # add help icons to label
-  # tags$a('Sessions', tooltip(bsicons::bs_icon("question-circle"), 'Currently active tmux sessions'))
+  
   if (!is.null(param$help)) {
-    label <- tags$a(
+    if (param$type == 'shinyDirButton') {
+      label <- param$label
+      param$icon <- tags$a(tooltip(bsicons::bs_icon("question-circle"), param$help))
+    } else {
+      label <- tags$a(
         param$label, 
         tooltip(
           bsicons::bs_icon("question-circle"),
@@ -53,7 +57,8 @@ create_input <- function(param) {
           placement = "right")
       )
     
-    param$label <- HTML(as.character(label))
+      param$label <- HTML(as.character(label))
+    }
     #param$label <- "Test"
   }
   

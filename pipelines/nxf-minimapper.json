@@ -10,6 +10,7 @@
     "id": "fastq",
     "label": "Fastq folder",
     "title": "Select folder containing fastq files",
+    "help": "Folder containing fastq files to be mapped",
     "required": true
     },
   

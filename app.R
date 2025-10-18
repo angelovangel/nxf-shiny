@@ -248,18 +248,19 @@ server <- function(input, output, session) {
   
   ##################################
   
-  # Validations
-  iv <- InputValidator$new()
-  
-  observe({
-
-    lapply(json()$shiny_inputs, function(p){
-      if (p$required) {
-        iv$add_rule(p$inputId, sv_required(message = 'Parameter is required!'))
-      }
-    })
-  })
-  
+  # # Validations
+  # iv <- InputValidator$new()
+  # 
+  # observeEvent(input$pipelines, {
+  #   #iv$disable
+  #   lapply(json()$shiny_inputs, function(p){
+  #     if (p$required) {
+  #       iv$add_rule(p$inputId, sv_required(message = 'Parameter is required!'))
+  #     }
+  #   })
+  #   iv$enable
+  # })
+  # 
   # Monitor tmux sessions ##################################
   tmux_sessions <- reactive({
     invalidateLater(3000, session)
@@ -412,13 +413,13 @@ server <- function(input, output, session) {
     
     session_id <- digest(runif(1), algo = 'crc32')
     
-    iv$enable()
-    # Check if all inputs are valid before proceeding
-    if (!iv$is_valid()) {
-      showNotification("Please correct the required fields!", type = "warning")
-      # Stop the rest of the execution
-      return()
-    }
+    # # iv$enable()
+    # # Check if all inputs are valid before proceeding
+    # if (!iv$is_valid()) {
+    #   showNotification("Please correct the required fields!", type = "warning")
+    #   # Stop the rest of the execution
+    #   return()
+    # }
     
     # Collect inputs to build -params-file json
     ############################################
@@ -438,7 +439,7 @@ server <- function(input, output, session) {
       # take only datapath for fileInputs
       if(config_item$type == 'fileInput') {
         current_value <- isolate(input[[id]]$datapath)
-      
+     
       # shinyFiles cases
       } else if (config_item$type == 'shinyDirButton') {
         current_value <- parseDirPath(roots = c(home = Sys.getenv('HOME')), selection = input[[id]])
@@ -451,7 +452,12 @@ server <- function(input, output, session) {
       output_item <- setNames(list(id = current_value),id)
       
       # 5. Append to the final list
+      # don't include 'advanced' 
+      if (config_item$inputId == 'advanced') {
+        next
+      } else {
       final_state_list <- append(final_state_list, output_item)
+      }
     }
     
     # 6. Convert the list to a formatted JSON string

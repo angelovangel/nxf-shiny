@@ -1,0 +1,77 @@
+{
+  "name": "wf-alignment",
+  "fullname": "epi2me-labs/wf-alignment",
+  "url": "https://github.com/epi2me-labs/wf-alignment",
+  "shiny_inputs":
+[
+  {
+    "type": "shinyDirButton",
+    "inputId": "fastq",
+    "id": "fastq",
+    "label": "FASTQ folder",
+    "title": "",
+    "help": "Folder with FASTQ files to align",
+    "required": false
+  },
+  {
+    "type": "shinyDirButton",
+    "inputId": "references",
+    "id": "references",
+    "label": "References folder",
+    "title": "",
+    "help": "Folder with reference files (FASTA format)",
+    "required": false
+  },
+
+  {
+    "type": "textInput",
+    "inputId": "sample",
+    "label": "Sample",
+    "required": false,
+    "value": "",
+    "panel_condition": "input.sample_sheet == null",
+    "help": "Sample name. If provided, all reads in FASTQ folder will be considered one sample. Leave empty if using a samplesheet."
+  },
+  {
+    "type": "fileInput",
+    "inputId": "sample_sheet",
+    "label": "Samplesheet",
+    "required": false,
+    "multiple": false,
+    "accept": [".csv"],
+    "placeholder": "Upload samplesheet",
+    "panel_condition": "input.sample == ''",
+    "help": "CSV file with (at least) columns 'barcode','alias'."
+  },
+  {
+    "type": "checkboxInput",
+    "inputId": "advanced",
+    "label": "Advanced",
+    "required": false,
+    "value": false
+    },
+
+  {
+    "type": "textInput",
+    "inputId": "out_dir",
+    "label": "Output directory",
+    "required": false,
+    "value": "output",
+    "panel_condition": "input.advanced",
+    "help": "Name of directory for output of all workflow results"
+  },
+  {
+    "type": "selectInput",
+    "inputId": "minimap_preset",
+    "label": "Minimap2 preset",
+    "required": false,
+    "choices": {
+      "dna": "dna",
+      "rna": "rna"
+      },
+    "panel_condition": "input.advanced",
+    "help": "Pre-defined parameter sets for `minimap2`"
+    }
+]
+  
+}
