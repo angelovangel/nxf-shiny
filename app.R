@@ -355,6 +355,8 @@ server <- function(input, output, session) {
   })
   row_selected <- row_sel %>% throttle(1000)
   
+  # -profile reactive
+  profile_rv <- reactiveVal("")
   ##################################
   
   # Render and update tmux sessions table 
@@ -453,10 +455,16 @@ server <- function(input, output, session) {
       
       # 5. Append to the final list
       # don't include 'advanced' 
-      if (config_item$inputId == 'advanced') {
+      if (config_item$inputId == 'profile') {
+        profile_rv(paste('-profile', current_value, sep = ' '))
+        cat(profile_rv())
+        next # Skip adding it to the final_state_list
+      
+      } else if (config_item$inputId == 'advanced') {
         next
+      
       } else {
-      final_state_list <- append(final_state_list, output_item)
+        final_state_list <- append(final_state_list, output_item)
       }
     }
     
@@ -488,6 +496,7 @@ server <- function(input, output, session) {
     tmux_command <- paste(
       'nextflow', 'run', json()$fullname,
       '-params-file', file.path(fs::path_abs(instance_path), 'params-file.json'),
+      profile_rv(),
       # '-o', file.path('output', session_id),
       # '-w', file.path('work', session_id), not needed, as there is an unique instance path
       sep = ' '

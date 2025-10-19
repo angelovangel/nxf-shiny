@@ -71,7 +71,18 @@
       },
     "panel_condition": "input.advanced",
     "help": "Pre-defined parameter sets for `minimap2`"
-    }
+  },
+{
+    "type": "numericInput",
+    "inputId": "threads",
+    "label": "CPU Threads",
+    "required": false,
+    "value": 4,
+    "min": 1,
+    "step": 1,
+    "panel_condition": "input.advanced",
+    "help": "Number of CPU threads to use"
+}
 ]
   
 }

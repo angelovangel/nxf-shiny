@@ -70,4 +70,4 @@ The steps to add a new nextflow pipeline for use with this Shiny app:
 ```
 
 >Note about profiles   
-The `nextflow -profile` can be used by defining the profiles in the input json, like a normal parameter with `"inputId": "profile"` 
+The `nextflow -profile` can be used by defining the profiles in the input json, like a normal parameter with `"inputId": "profile"`. Currently, pipeline parameters defined with `-profile` is not working.

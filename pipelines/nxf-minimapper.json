@@ -61,6 +61,14 @@
     "required": false,
     "value": "",
     "panel_condition": "input.advanced"
+    },
+    {
+    "type": "textInput",
+    "inputId": "profile",
+    "label": "Profile",
+    "required": false,
+    "value": "",
+    "panel_condition": "input.advanced"
     }
   ]
 }
