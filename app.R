@@ -282,6 +282,12 @@ server <- function(input, output, session) {
         results = NA
       )
       
+      # filter out tmux sessions that don't belong to this app
+      df <- 
+        df %>%
+        filter(str_detect(session_id, '^[A-Za-z0-9]{8}$'))
+      
+      
       # add status etc from nxflog
       # Because every run is isolated in instances/session_id, nextflow log has to be run there to get nxf log data
       # 1. Run nxf_log for all sessions in the df, collect results in a list of dataframes
