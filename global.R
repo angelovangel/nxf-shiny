@@ -12,11 +12,16 @@ pipeline_finished <- function(id, df) {
 }
 
 # return nextflow log table for a nextflow log in a specific folder
+# DO NOT invoke nextflow log, just read .nextflow/history
 nxf_log <- function(path) {
   
-  log <- processx::run('nextflow', 'log', wd = path, error_on_status = F)
+  #log <- processx::run('nextflow', 'log', wd = path, error_on_status = F)
+  log <- processx::run('cat', args = fs::path(path, '.nextflow', 'history'), error_on_status = F)
   if (log$status == 0) {
-    read.table(text = log$stdout, header = T, sep = '\t')
+    #read.table(text = log$stdout, header = T, sep = '\t')
+    t <- read.table(text = log$stdout, header = F, sep = '\t')
+    colnames(t) <- c("TIMESTAMP", "DURATION", "RUN.NAME", "STATUS", "REVISION.ID", "SESSION.ID", "COMMAND")
+    t
   } else {
     data.frame(
       TIMESTAMP = NA,

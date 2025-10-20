@@ -262,8 +262,9 @@ server <- function(input, output, session) {
   # })
   # 
   # Monitor tmux sessions ##################################
+  # The reactiveVal tmuxinfo_rv and nxflog_rv are used here
   tmux_sessions <- reactive({
-    invalidateLater(3000, session)
+    invalidateLater(1000, session) # this is 1 sec, the updateReactable is 2 sec
     oldw <- getOption("warn")
     options(warn = -1)
     tmuxinfo <- system2("bin/tmux-info.sh", stdout = TRUE, stderr = TRUE)
@@ -356,10 +357,10 @@ server <- function(input, output, session) {
   # Monitor tmux sessions ##################################
   
   # row and session selected  
-  row_sel <- reactive({
+  row_selected <- reactive({
     getReactableState('table', 'selected', session = session)
   })
-  row_selected <- row_sel %>% throttle(1000)
+  #row_selected <- row_sel %>% throttle(1000)
   
   # -profile reactive
   profile_rv <- reactiveVal("")
@@ -387,6 +388,7 @@ server <- function(input, output, session) {
   })
   
   observe({
+    invalidateLater(2000)
     updateReactable(
       'table', 
       data = tmux_sessions(), 
@@ -460,12 +462,13 @@ server <- function(input, output, session) {
       output_item <- setNames(list(id = current_value),id)
       
       # 5. Append to the final list
-      # don't include 'advanced' 
-      if (config_item$inputId == 'profile') {
-        profile_rv(paste('-profile', current_value, sep = ' '))
-        cat(profile_rv())
-        next # Skip adding it to the final_state_list
+      # don't include 'advanced' and 'profile, also leave profile empty if nothing there
       
+      if (config_item$inputId == 'profile' && current_value != '') {
+        profile_rv(paste('-profile', current_value, sep = ' '))
+        next 
+      } else if(config_item$inputId == 'profile' && current_value == '') {
+        next
       } else if (config_item$inputId == 'advanced') {
         next
       
