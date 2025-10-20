@@ -15,23 +15,17 @@ pipeline_finished <- function(id, df) {
 # DO NOT invoke nextflow log, just read .nextflow/history
 nxf_log <- function(path) {
   
+  cols <- c("TIMESTAMP", "DURATION", "RUN.NAME", "STATUS", "REVISION.ID", "SESSION.ID", "COMMAND")
   #log <- processx::run('nextflow', 'log', wd = path, error_on_status = F)
   log <- processx::run('cat', args = fs::path(path, '.nextflow', 'history'), error_on_status = F)
   if (log$status == 0) {
     #read.table(text = log$stdout, header = T, sep = '\t')
     t <- read.table(text = log$stdout, header = F, sep = '\t')
-    colnames(t) <- c("TIMESTAMP", "DURATION", "RUN.NAME", "STATUS", "REVISION.ID", "SESSION.ID", "COMMAND")
+    colnames(t) <- cols
     t
   } else {
-    data.frame(
-      TIMESTAMP = NA,
-      DURATION = NA,
-      RUN.NAME = NA,
-      STATUS = NA,
-      REVISION.ID = NA,
-      SESSION.ID = NA,
-      COMMAND = NA
-    )
+    data_list <- setNames(rep(list(NA), length(cols)), cols)
+    as.data.frame(data_list, stringsAsFactors = FALSE)
   }
   
 }

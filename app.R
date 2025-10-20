@@ -357,10 +357,10 @@ server <- function(input, output, session) {
   # Monitor tmux sessions ##################################
   
   # row and session selected  
-  row_selected <- reactive({
+  row_sel <- reactive({
     getReactableState('table', 'selected', session = session)
   })
-  #row_selected <- row_sel %>% throttle(1000)
+  row_selected <- row_sel %>% throttle(1000)
   
   # -profile reactive
   profile_rv <- reactiveVal("")
