@@ -307,7 +307,7 @@ server <- function(input, output, session) {
       
       df$status <- sapply(df$session_id, function(x) {
         #nxflog <- nxf_log(fs::path('instances', x))
-        status_info <- nxflogs[[x]]$STATUS
+        status_info <- tail(nxflogs[[x]]$STATUS, 1) # take last, sometimes same session id has more entries
         
         # just formatting status
         if (is.na(status_info)) {
@@ -327,10 +327,10 @@ server <- function(input, output, session) {
         }
       })
       df$status <- as.character(df$status) # avoid a warning if status is not atomic
-      df$pipeline_time = sapply(df$session_id, function(x) { nxflogs[[x]]$DURATION})
+      df$pipeline_time = sapply(df$session_id, function(x) { tail(nxflogs[[x]]$DURATION, 1) })
       
       df$pipeline = sapply(df$session_id, function(x) {
-        command <- nxflogs[[x]]$COMMAND
+        command <- tail(nxflogs[[x]]$COMMAND, 1)
         str_extract(command, "(?<=nextflow run\\s)\\S+")
       })
       
