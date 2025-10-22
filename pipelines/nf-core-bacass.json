@@ -1,0 +1,43 @@
+{
+  "name": "nf-core-bacass",
+  "fullname": "nf-core/bacass",
+  "url": "https://nf-co.re/bacass/",
+  "shiny_inputs":
+[
+  {
+    "type": "fileInput",
+    "inputId": "input",
+    "label": "Samplesheet",
+    "required": true,
+    "multiple": false,
+    "accept": [".csv"],
+    "placeholder": "Upload samplesheet",
+    "help": "Must have six tab-separated columns/entries with the following headers:\nID (required) - Unique sample IDs, must start with a letter, and can only contain letters, numbers or underscores\nR1 (optional) - Paths to (forward) reads zipped FastQ files\nR2 (optional) - Paths to reverse reads zipped FastQ files, required if the data is paired-end\nLongFastQ (optional) - Paths to long reads zipped FastQ files\nFast5 (optional) - Paths to the directory containing FAST5 files\nGenomeSize (optional) - A number (including decimals) ending with m, representing genome size."
+  },
+  {
+    "type": "textInput",
+    "inputId": "outdir",
+    "label": "Output directory",
+    "required": true,
+    "value": "output",
+    "help": "The output directory where the results will be saved"
+  },
+
+  {
+    "type": "checkboxInput",
+    "inputId": "advanced",
+    "label": "Advanced",
+    "required": false,
+    "value": false
+    },
+    {
+    "type": "textInput",
+    "inputId": "profile",
+    "label": "Profile",
+    "required": false,
+    "value": "",
+    "panel_condition": "input.advanced"
+    }
+]
+  
+}
