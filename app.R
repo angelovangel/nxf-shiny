@@ -362,8 +362,9 @@ server <- function(input, output, session) {
   })
   row_selected <- row_sel %>% throttle(1000)
   
-  # -profile reactive
-  profile_rv <- reactiveVal("")
+  # -profile and -r reactives
+  profile_rv <- reactiveVal("") # if profile is available as a Shiny text input and something is entered in the UI, it will be passed to nextflow run ... -profile input
+  revision_rv <- reactiveVal("") # if revision is available as a Shiny text input and something is entered in the UI  it will be passed as nextflow run ... -r input
   ##################################
   
   # Render and update tmux sessions table 
@@ -462,12 +463,17 @@ server <- function(input, output, session) {
       output_item <- setNames(list(id = current_value),id)
       
       # 5. Append to the final list
-      # don't include 'advanced' and 'profile, also leave profile empty if nothing there
+      # don't include 'advanced' and 'profile'/'revision', also leave profile empty if nothing there
       
       if (config_item$inputId == 'profile' && current_value != '') {
         profile_rv(paste('-profile', current_value, sep = ' '))
         next 
-      } else if(config_item$inputId == 'profile' && current_value == '') {
+      } else if (config_item$inputId == 'profile' && current_value == '') {
+        next
+      } else if (config_item$inputId == 'revision' && current_value != '') {
+        revision_rv(paste('-r', current_value, sep = ' '))
+        next
+      } else if (config_item$inputId == 'revision' && current_value == '') {
         next
       } else if (config_item$inputId == 'advanced') {
         next
@@ -506,6 +512,7 @@ server <- function(input, output, session) {
       'nextflow', 'run', json()$fullname,
       '-params-file', file.path(fs::path_abs(instance_path), 'params-file.json'),
       profile_rv(),
+      revision_rv(),
       # '-o', file.path('output', session_id),
       # '-w', file.path('work', session_id), not needed, as there is an unique instance path
       sep = ' '

@@ -12,7 +12,7 @@
     "multiple": false,
     "accept": [".csv"],
     "placeholder": "Upload samplesheet",
-    "help": "Must have six tab-separated columns/entries with the following headers:\nID (required) - Unique sample IDs, must start with a letter, and can only contain letters, numbers or underscores\nR1 (optional) - Paths to (forward) reads zipped FastQ files\nR2 (optional) - Paths to reverse reads zipped FastQ files, required if the data is paired-end\nLongFastQ (optional) - Paths to long reads zipped FastQ files\nFast5 (optional) - Paths to the directory containing FAST5 files\nGenomeSize (optional) - A number (including decimals) ending with m, representing genome size."
+    "help": "Tab-separated entries with the following headers:<br><b>ID</b> (required)<br><b>R1</b> (optional) - Paths to (forward) reads zipped FastQ files<br><b>R2</b> (optional) - Paths to reverse reads zipped FastQ files<br><b>LongFastQ</b> (optional) - Paths to long reads zipped FastQ files<br><b>Fast5</b> (optional) - Paths to the directory containing FAST5 files<br><b>GenomeSize</b> (optional) - A number (including decimals) ending with m, representing genome size."
   },
   {
     "type": "textInput",
@@ -34,6 +34,14 @@
     "type": "textInput",
     "inputId": "profile",
     "label": "Profile",
+    "required": false,
+    "value": "",
+    "panel_condition": "input.advanced"
+    },
+    {
+    "type": "textInput",
+    "inputId": "revision",
+    "label": "Version / git revision",
     "required": false,
     "value": "",
     "panel_condition": "input.advanced"

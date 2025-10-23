@@ -46,13 +46,22 @@ create_input <- function(param) {
   if (!is.null(param$help)) {
     if (param$type == 'shinyDirButton') {
       label <- param$label
-      param$icon <- tags$a(tooltip(bsicons::bs_icon("question-circle"), param$help))
+      param$icon <- tags$a(tooltip(
+        bsicons::bs_icon("question-circle"), 
+        param$help,
+        options = list(
+            template = '<div class="tooltip" role="tooltip"><div class="tooltip-inner" style="max-width:600px; white-space:normal;text-align:left;"></div></div>'
+          )
+        ))
     } else {
       label <- tags$a(
         param$label, 
         tooltip(
           bsicons::bs_icon("question-circle"),
-          param$help,
+          HTML(param$help),
+          options = list(
+            template = '<div class="tooltip" role="tooltip"><div class="tooltip-inner" style="max-width:600px; white-space:normal;text-align:left;"></div></div>'
+          ),
           placement = "right")
       )
     

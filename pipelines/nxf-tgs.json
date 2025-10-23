@@ -11,7 +11,8 @@
     "required": true,
     "multiple": false,
     "accept": [".csv", ".xlsx"],
-    "placeholder": "Upload samplesheet"
+    "placeholder": "Upload samplesheet",
+    "help": "path to csv or excel with (at least) columns user, sample, barcode, dna_size"
   },
   {
     "type": "shinyDirButton",
@@ -28,8 +29,25 @@
     "label": "epi2me workflow",
     "required": true,
     "multiple": false,
-    "choices": ["wf-clone-validation", "wf-bacterial-genomes", "wf-amplicon", "report-only"]
-  }
+    "choices": ["wf-clone-validation", "wf-bacterial-genomes", "wf-amplicon", "report-only"],
+    "help" : "epi2me workflow to run"
+  },
+   {
+    "type": "checkboxInput",
+    "inputId": "advanced",
+    "label": "Advanced",
+    "required": false,
+    "value": false
+    },
+    {
+    "type": "textInput",
+    "inputId": "assembly_args",
+    "label": "Additional assembly args",
+    "help" : "Additional command-line arguments passed to the assembly workflow",
+    "required": false,
+    "value": "",
+    "panel_condition": "input.advanced"
+    }
   
 ]
   
