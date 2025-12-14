@@ -1,0 +1,108 @@
+{
+  "name": "nxf-alignment",
+  "fullname": "angelovangel/nxf-alignment",
+  "url": "https://github.com/angelovangel/nxf-alignment",
+  "shiny_inputs": [
+    {
+      "type": "shinyDirButton",
+      "inputId": "pod5",
+      "id": "pod5",
+      "label": "POD5 folder",
+      "title": "Select folder containing pod5 files",
+      "help": "Folder containing pod5 files to be basecalled",
+      "required": false
+    },
+    {
+      "type": "shinyDirButton",
+      "inputId": "reads",
+      "id": "reads",
+      "label": "FASTQ/BAM reads",
+      "title": "Select folder with FASTQ/BAM files",
+      "multiple": false,
+      "required": false,
+      "help": "Directory with reads (BAM/FASTQ files, skips basecalling)"
+    },
+    {
+      "type": "shinyFilesButton",
+      "inputId": "asfile",
+      "id": "asfile",
+      "label": "Adaptive sampling file",
+      "title": "Adaptive sampling file",
+      "multiple": false,
+      "required": false,
+      "help": "Path to adaptive sampling decisions file, filters reads to basecall"
+    },
+    {
+      "type": "shinyFilesButton",
+      "inputId": "ref",
+      "id": "ref",
+      "label": "Reference file",
+      "title": "Reference file (fasta)",
+      "multiple": false,
+      "required": true,
+      "help": "Path to reference FASTA (required unless -entry basecall is used)"
+    },
+    {
+      "type": "textInput",
+      "inputId": "model",
+      "label": "Dorado model",
+      "required": false,
+      "value": "fast",
+      "help": "Dorado basecalling model to use"
+    },
+    {
+      "type": "fileInput",
+      "inputId": "bed",
+      "label": "BED file",
+      "required": false,
+      "multiple": false,
+      "accept": [
+        ".bed"
+      ],
+      "placeholder": "Upload BED file",
+      "help": "BED file with regions (auto-generated from reference if omitted)"
+    },
+    {
+      "type": "fileInput",
+      "inputId": "samplesheet",
+      "label": "Samplesheet",
+      "required": false,
+      "multiple": false,
+      "accept": [
+        ".csv"
+      ],
+      "placeholder": "Upload samplesheet",
+      "help": "CSV with columns: sample,barcode (required with --kit)"
+    },
+    {
+      "type": "selectInput",
+      "inputId": "kit",
+      "label": "Barcoding kit",
+      "required": false,
+      "multiple": false,
+      "choices": {
+        "": "",
+        "SQK-NBD114-24": "SQK-NBD114-24",
+        "SQK-NBD114-96": "SQK-NBD114-96",
+        "SQK-RBK114-24": "SQK-RBK114-24",
+        "SQK-RBK114-96": "SQK-RBK114-96"
+      },
+      "help": "Barcoding kit name (required with --samplesheet)"
+    },
+    {
+      "type": "checkboxInput",
+      "inputId": "advanced",
+      "label": "Advanced",
+      "required": false,
+      "value": false
+    },
+    {
+      "type": "textInput",
+      "inputId": "profile",
+      "label": "Profile",
+      "required": false,
+      "value": "",
+      "panel_condition": "input.advanced"
+    }
+  ]
+}
