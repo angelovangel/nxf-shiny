@@ -50,7 +50,6 @@ rsconnect/
 
 .nextflow*
 work
-www
 instances
 output
 .DS_Store
