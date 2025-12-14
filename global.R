@@ -108,9 +108,9 @@ bind_shinyfiles <- function(config, input) {
   # which params are shinyDirButton or shinyFilesButton, get their id and return shinyDirChoose(input, id, ...)
   lapply(config, function(p){
     if (str_detect(string = p$type, pattern = "shinyDirButton")) {
-      shinyDirChoose(input, p$inputId, roots = c(home = Sys.getenv('HOME')), allowDirCreate = FALSE)
+      shinyDirChoose(input, p$inputId, roots = c(home = Sys.getenv('HOME'), mnt = '/mnt'), allowDirCreate = FALSE)
     } else if (str_detect(string = p$type, pattern = "shinyFilesButton")) {
-      shinyFileChoose(input, p$inputId, roots = c(home = Sys.getenv('HOME')))
+      shinyFileChoose(input, p$inputId, roots = c(home = Sys.getenv('HOME'), mnt = '/mnt'))
     } else {
       return()
     }
