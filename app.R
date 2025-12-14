@@ -192,7 +192,7 @@ server <- function(input, output, session) {
       # **MODIFIED LOGIC**
       if (input_type == 'shinyDirButton') {
         # Only parse if a selection has been made (path element exists)
-        parsed_dir <- parseDirPath(roots = c(home = Sys.getenv('HOME')), selection = current_value)
+        parsed_dir <- parseDirPath(roots = c(home = Sys.getenv('HOME'), mnt = '/mnt'), selection = current_value)
         
         # add/remove css class for better ui
         if (is.list(current_value)) {
@@ -208,7 +208,7 @@ server <- function(input, output, session) {
         
       } else if (input_type == 'shinyFilesButton') {  
         # Only parse if a selection has been made (files element exists)
-        parsed_file <- parseFilePaths(roots = c(home = Sys.getenv('HOME')), selection = current_value)
+        parsed_file <- parseFilePaths(roots = c(home = Sys.getenv('HOME'), mnt = '/mnt'), selection = current_value)
         
         # add/remove css class for better ui
         if (is.list(current_value)) {
@@ -453,9 +453,9 @@ server <- function(input, output, session) {
      
       # shinyFiles cases
       } else if (config_item$type == 'shinyDirButton') {
-        current_value <- parseDirPath(roots = c(home = Sys.getenv('HOME')), selection = input[[id]])
+        current_value <- parseDirPath(roots = c(home = Sys.getenv('HOME'), mnt = '/mnt'), selection = input[[id]])
       } else if (config_item$type == 'shinyFilesButton') {
-        parsed_file <- parseFilePaths(roots = c(home = Sys.getenv('HOME')), selection = input[[id]])
+        parsed_file <- parseFilePaths(roots = c(home = Sys.getenv('HOME'), mnt = '/mnt'), selection = input[[id]])
         current_value <- parsed_file$datapath
       }
       
