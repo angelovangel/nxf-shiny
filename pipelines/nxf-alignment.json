@@ -13,6 +13,14 @@
       "required": false
     },
     {
+      "type": "textInput",
+      "inputId": "model",
+      "label": "Dorado model",
+      "required": false,
+      "value": "fast",
+      "help": "Dorado basecalling model to use"
+    },
+    {
       "type": "shinyDirButton",
       "inputId": "reads",
       "id": "reads",
@@ -43,24 +51,21 @@
       "help": "Path to reference FASTA (required unless -entry basecall is used)"
     },
     {
-      "type": "textInput",
-      "inputId": "model",
-      "label": "Dorado model",
-      "required": false,
-      "value": "fast",
-      "help": "Dorado basecalling model to use"
-    },
-    {
-      "type": "fileInput",
+      "type": "shinyFilesButton",
       "inputId": "bed",
+      "id": "bed",
       "label": "BED file",
+      "title": "BED file",
       "required": false,
       "multiple": false,
-      "accept": [
-        ".bed"
-      ],
-      "placeholder": "Upload BED file",
       "help": "BED file with regions (auto-generated from reference if omitted)"
+    },
+    {
+      "type": "checkboxInput",
+      "inputId": "advanced_barcoded",
+      "label": "Barcoded run",
+      "required": false,
+      "value": false
     },
     {
       "type": "fileInput",
@@ -72,6 +77,7 @@
         ".csv"
       ],
       "placeholder": "Upload samplesheet",
+      "panel_condition": "input.advanced_barcoded",
       "help": "CSV with columns: sample,barcode (required with --kit)"
     },
     {
@@ -80,6 +86,7 @@
       "label": "Barcoding kit",
       "required": false,
       "multiple": false,
+      "panel_condition": "input.advanced_barcoded",
       "choices": {
         "": "",
         "SQK-NBD114-24": "SQK-NBD114-24",

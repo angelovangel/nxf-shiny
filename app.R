@@ -475,9 +475,9 @@ server <- function(input, output, session) {
         next
       } else if (config_item$inputId == 'revision' && current_value == '') {
         next
-      } else if (config_item$inputId == 'advanced') {
+      # prepend 'advanced_' to inputIds that are to be excluded from the json params file
+      } else if (str_detect(config_item$inputId, 'advanced')) {
         next
-      
       } else {
         final_state_list <- append(final_state_list, output_item)
       }
