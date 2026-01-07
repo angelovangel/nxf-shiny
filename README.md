@@ -37,7 +37,7 @@ The keys correspond to the parameters of the Shiny input objects.
 The `inputId` corresponds to the Nextflow parameter name, and the value provided by the user is passed to nextflow.
 For the above example, this is given to nextflow as:
 ```
-nextflow run pipeline --fastq path/to/file --format fasta ...
+nextflow run pipeline --fastq path/to/file --ref path/to/ref ...
 ```
 ### Supported Shiny input types
 All Shiny input types can be used - https://shiny.posit.co/r/getstarted/build-an-app/reactive-flow/ui-inputs.html

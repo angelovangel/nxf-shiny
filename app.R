@@ -363,7 +363,7 @@ server <- function(input, output, session) {
   row_selected <- row_sel %>% throttle(1000)
   
   # -profile and -r reactives
-  profile_rv <- reactiveVal("") # if profile is available as a Shiny text input and something is entered in the UI, it will be passed to nextflow run ... -profile input
+  profile_rv <- reactiveVal("") # if profile is available as a Shiny text input and if something is entered in the UI, it will be passed to nextflow run ... -profile input
   revision_rv <- reactiveVal("") # if revision is available as a Shiny text input and something is entered in the UI  it will be passed as nextflow run ... -r input
   ##################################
   

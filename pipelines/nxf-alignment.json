@@ -9,6 +9,7 @@
       "id": "pod5",
       "label": "POD5 folder",
       "title": "Select folder containing pod5 files",
+      "panel_condition": "!input.reads",
       "help": "Folder containing pod5 files to be basecalled",
       "required": false
     },
@@ -18,6 +19,7 @@
       "label": "Dorado model",
       "required": false,
       "value": "fast",
+      "panel_condition": "input.pod5",
       "help": "Dorado basecalling model to use"
     },
     {
@@ -28,6 +30,7 @@
       "title": "Select folder with FASTQ/BAM files",
       "multiple": false,
       "required": false,
+      "panel_condition": "!input.pod5",
       "help": "Directory with reads (BAM/FASTQ files, skips basecalling)"
     },
     {
@@ -38,6 +41,7 @@
       "title": "Adaptive sampling file",
       "multiple": false,
       "required": false,
+      "panel_condition": "input.pod5",
       "help": "Path to adaptive sampling decisions file, filters reads to basecall"
     },
     {
@@ -96,6 +100,39 @@
       },
       "help": "Barcoding kit name (required with --samplesheet)"
     },
+    
+    {
+     "type": "checkboxInput",
+      "inputId": "variants",
+      "label": "Variants",
+      "required": false,
+      "value": false,
+      "help": "Enable variant calling on the aligned reads using Clair3"
+    },
+    {
+      "type": "selectInput",
+      "inputId": "clair3_platform",
+      "label": "Clair3 platform",
+      "required": false,
+      "multiple": false,
+      "panel_condition": "input.variants",
+      "choices": {
+        "ont": "ont",
+        "hifi": "hifi",
+        "ilmn": "ilmn"
+      },
+      "help": "The platform for which the Clair3 model was trained. Only used when --variants is specified."
+    },
+    {
+      "type": "textInput",
+      "inputId": "clair3_model",
+      "label": "Clair3 model",
+      "required": false,
+      "value": "r1041_e82_400bps_hac_v500",
+      "panel_condition": "input.variants",
+      "help": "The specific Clair3 model name. Only used when --variants is specified. See available models in the Clair3 documentation."
+    },
+    
     {
       "type": "checkboxInput",
       "inputId": "advanced",
