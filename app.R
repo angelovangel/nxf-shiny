@@ -302,14 +302,13 @@ server <- function(input, output, session) {
           status_info <- "NA"
         }
         if (length(status_info) == 0) {
-          "<a style='color:orange';> STARTING </a>"
+          "<span style='color:orange !important; font-weight: bold;'> STARTING </span>"
         } else if (str_trim(status_info) == "-") {
-          "<a style='color:orange;'> RUNNING </a>"
+          "<span style='color:orange !important; font-weight: bold;'> RUNNING </span>"
         } else if (str_trim(status_info) == "OK") {
-          # "OK"
-          "<a style='color:green;'> OK </a>"
+          "<span style='color:green !important; font-weight: bold;'> OK </span>"
         } else if (str_trim(status_info) == "ERR") {
-          "<a style='color:red;'> ERR </a>"
+          "<span style='color:red !important; font-weight: bold;'> ERR </span>"
         } else {
           status_info
         }
@@ -326,7 +325,7 @@ server <- function(input, output, session) {
 
       df <- df %>%
         mutate(
-          status = ifelse(str_detect(status, "-"), "RUNNING", status),
+          # status = ifelse(str_detect(status, "-"), "RUNNING", status),
           tmux_time = prettyunits::pretty_dt(difftime(Sys.time(), started), compact = T)
         ) %>%
         arrange(started)

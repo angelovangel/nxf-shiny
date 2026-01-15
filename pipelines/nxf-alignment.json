@@ -23,6 +23,14 @@
       "help": "Dorado basecalling model to use"
     },
     {
+      "type": "checkboxInput",
+      "inputId": "herro",
+      "label": "Enable HERRO read correction",
+      "required": false,
+      "value": false,
+      "panel_condition": "input.pod5"
+    },
+    {
       "type": "shinyDirButton",
       "inputId": "reads",
       "id": "reads",
@@ -44,32 +52,13 @@
       "panel_condition": "input.pod5",
       "help": "Path to adaptive sampling decisions file, filters reads to basecall"
     },
-    {
-      "type": "shinyFilesButton",
-      "inputId": "ref",
-      "id": "ref",
-      "label": "Reference file",
-      "title": "Reference file (fasta)",
-      "multiple": false,
-      "required": true,
-      "help": "Path to reference FASTA (required unless -entry basecall is used)"
-    },
-    {
-      "type": "shinyFilesButton",
-      "inputId": "bed",
-      "id": "bed",
-      "label": "BED file",
-      "title": "BED file",
-      "required": false,
-      "multiple": false,
-      "help": "BED file with regions (auto-generated from reference if omitted)"
-    },
-    {
+     {
       "type": "checkboxInput",
       "inputId": "advanced_barcoded",
       "label": "Barcoded run",
       "required": false,
-      "value": false
+      "value": false,
+      "panel_condition": "input.pod5"
     },
     {
       "type": "selectInput",
@@ -99,6 +88,26 @@
       "placeholder": "Upload samplesheet",
       "panel_condition": "input.advanced_barcoded",
       "help": "CSV with columns: sample,barcode (required with --kit)"
+    },
+    {
+      "type": "shinyFilesButton",
+      "inputId": "ref",
+      "id": "ref",
+      "label": "Reference file",
+      "title": "Reference file (fasta)",
+      "multiple": false,
+      "required": true,
+      "help": "Path to reference FASTA (required unless -entry basecall is used)"
+    },
+    {
+      "type": "shinyFilesButton",
+      "inputId": "bed",
+      "id": "bed",
+      "label": "BED file",
+      "title": "BED file",
+      "required": false,
+      "multiple": false,
+      "help": "BED file with regions (auto-generated from reference if omitted)"
     },
     {
       "type": "checkboxInput",
