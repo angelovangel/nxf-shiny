@@ -72,19 +72,6 @@
       "value": false
     },
     {
-      "type": "fileInput",
-      "inputId": "samplesheet",
-      "label": "Samplesheet",
-      "required": false,
-      "multiple": false,
-      "accept": [
-        ".csv"
-      ],
-      "placeholder": "Upload samplesheet",
-      "panel_condition": "input.advanced_barcoded",
-      "help": "CSV with columns: sample,barcode (required with --kit)"
-    },
-    {
       "type": "selectInput",
       "inputId": "kit",
       "label": "Barcoding kit",
@@ -100,9 +87,21 @@
       },
       "help": "Barcoding kit name (required with --samplesheet)"
     },
-    
     {
-     "type": "checkboxInput",
+      "type": "fileInput",
+      "inputId": "samplesheet",
+      "label": "Samplesheet",
+      "required": false,
+      "multiple": false,
+      "accept": [
+        ".csv"
+      ],
+      "placeholder": "Upload samplesheet",
+      "panel_condition": "input.advanced_barcoded",
+      "help": "CSV with columns: sample,barcode (required with --kit)"
+    },
+    {
+      "type": "checkboxInput",
       "inputId": "variants",
       "label": "Variants",
       "required": false,
@@ -132,7 +131,24 @@
       "panel_condition": "input.variants",
       "help": "The specific Clair3 model name. Only used when --variants is specified. See available models in the Clair3 documentation."
     },
-    
+    {
+      "type": "checkboxInput",
+      "inputId": "annotate",
+      "label": "Annotate variants",
+      "required": false,
+      "value": false,
+      "panel_condition": "input.variants",
+      "help": "Annotate variants using snpEff"
+    },
+    {
+      "type": "textInput",
+      "inputId": "anno_db",
+      "label": "snpEff annotation database",
+      "required": false,
+      "value": "hg38",
+      "panel_condition": "input.annotate",
+      "help": "snpEff annotation database to use"
+    },
     {
       "type": "checkboxInput",
       "inputId": "advanced",
