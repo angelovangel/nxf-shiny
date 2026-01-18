@@ -69,10 +69,20 @@
       "panel_condition": "input.advanced_barcoded",
       "choices": {
         "": "",
-        "SQK-NBD114-24": "SQK-NBD114-24",
-        "SQK-NBD114-96": "SQK-NBD114-96",
-        "SQK-RBK114-24": "SQK-RBK114-24",
-        "SQK-RBK114-96": "SQK-RBK114-96"
+        "SQK-16S024":"SQK-16S024",
+        "SQK-16S114-24":"SQK-16S114-24",
+        "SQK-NBD114-24":"SQK-NBD114-24",
+        "SQK-NBD114-96":"SQK-NBD114-96",
+        "SQK-PCB114-24":"SQK-PCB114-24",
+        "SQK-RBK114-24":"SQK-RBK114-24",
+        "SQK-RBK114-96":"SQK-RBK114-96",
+        "SQK-RPB114-24":"SQK-RPB114-24",
+        "TWIST-16-UDI":"TWIST-16-UDI",
+        "TWIST-96A-UDI":"TWIST-96A-UDI",
+        "VSK-PTC001":"VSK-PTC001",
+        "VSK-VMK001":"VSK-VMK001",
+        "VSK-VMK004":"VSK-VMK004",
+        "VSK-VPS001":"VSK-VPS001"
       },
       "help": "Barcoding kit name (required with --samplesheet)"
     },
@@ -111,8 +121,8 @@
     },
     {
       "type": "checkboxInput",
-      "inputId": "variants",
-      "label": "Variants",
+      "inputId": "snp",
+      "label": "Enable SNP calling",
       "required": false,
       "value": false,
       "help": "Enable variant calling on the aligned reads using Clair3"
@@ -123,7 +133,7 @@
       "label": "Clair3 platform",
       "required": false,
       "multiple": false,
-      "panel_condition": "input.variants",
+      "panel_condition": "input.snp",
       "choices": {
         "ont": "ont",
         "hifi": "hifi",
@@ -137,8 +147,16 @@
       "label": "Clair3 model",
       "required": false,
       "value": "r1041_e82_400bps_hac_v500",
-      "panel_condition": "input.variants",
+      "panel_condition": "input.snp",
       "help": "The specific Clair3 model name. Only used when --variants is specified. See available models in the Clair3 documentation."
+    },
+    {
+      "type": "checkboxInput",    
+      "inputId": "sv",
+      "label": "Enable SV calling",
+      "required": false,
+      "value": false,
+      "help": "Enable structural variant calling with Sniffles2"
     },
     {
       "type": "checkboxInput",
@@ -146,7 +164,7 @@
       "label": "Annotate variants",
       "required": false,
       "value": false,
-      "panel_condition": "input.variants",
+      "panel_condition": "input.snp",
       "help": "Annotate variants using snpEff"
     },
     {
