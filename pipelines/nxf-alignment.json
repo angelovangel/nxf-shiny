@@ -125,7 +125,18 @@
       "label": "Enable SNP calling",
       "required": false,
       "value": false,
-      "help": "Enable variant calling on the aligned reads using Clair3"
+      "help": "Enable variant calling on the aligned reads using Clair3 or DeepVariant"
+    },
+    {
+      "type": "selectInput",
+      "inputId": "snp_caller",
+      "label": "SNP caller",
+      "required": false,
+      "panel_condition": "input.snp",
+      "choices": {
+        "clair3": "clair3",
+        "deepvariant": "deepvariant"
+      }
     },
     {
       "type": "selectInput",
@@ -139,7 +150,7 @@
         "hifi": "hifi",
         "ilmn": "ilmn"
       },
-      "help": "The platform for which the Clair3 model was trained. Only used when --variants is specified."
+      "help": "The platform for which the Clair3 model was trained. Only used when --snp is specified."
     },
     {
       "type": "textInput",
@@ -148,15 +159,31 @@
       "required": false,
       "value": "r1041_e82_400bps_hac_v500",
       "panel_condition": "input.snp",
-      "help": "The specific Clair3 model name. Only used when --variants is specified. See available models in the Clair3 documentation."
+      "help": "The specific Clair3 model name. Only used when --snp is specified. See available models in the Clair3 documentation."
     },
     {
-      "type": "checkboxInput",    
-      "inputId": "sv",
-      "label": "Enable SV calling",
+    "type": "selectInput",
+    "inputId": "deepvariant_model",
+    "label": "DeepVariant model",
+    "required": false,
+    "multiple": false,
+    "panel_condition": "input.snp",
+    "choices": {
+        "ONT_R104":"ONT_R104",
+        "PACBIO": "PACBIO",
+        "WGS": "WGS",
+        "WES": "WES",
+        "HYBRID_PACBIO_ILLUMINA": "HYBRID_PACBIO_ILLUMINA"
+      }
+    },
+    {
+      "type": "checkboxInput",
+      "inputId": "phase",
+      "label": "Phase variants",
       "required": false,
       "value": false,
-      "help": "Enable structural variant calling with Sniffles2"
+      "panel_condition": "input.snp",
+      "help": "Phase SNP variants using WhatsHap, only diploid cases supported"
     },
     {
       "type": "checkboxInput",
@@ -166,6 +193,14 @@
       "value": false,
       "panel_condition": "input.snp",
       "help": "Annotate variants using snpEff"
+    },
+    {
+      "type": "checkboxInput",    
+      "inputId": "sv",
+      "label": "Enable SV calling",
+      "required": false,
+      "value": false,
+      "help": "Enable structural variant calling with Sniffles2"
     },
     {
       "type": "textInput",
