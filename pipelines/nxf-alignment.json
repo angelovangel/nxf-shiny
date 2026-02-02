@@ -219,6 +219,14 @@
       "value": false
     },
     {
+      "type": "numericInput",
+      "inputId": "cpus",
+      "label": "Number of CPUs",
+      "required": false,
+      "value": 64,
+      "panel_condition": "input.advanced"
+    },
+    {
       "type": "textInput",
       "inputId": "profile",
       "label": "Profile",
