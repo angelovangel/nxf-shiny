@@ -52,7 +52,7 @@
       "panel_condition": "input.pod5",
       "help": "Path to adaptive sampling decisions file, filters reads to basecall"
     },
-     {
+    {
       "type": "checkboxInput",
       "inputId": "advanced_barcoded",
       "label": "Barcoded run",
@@ -69,20 +69,20 @@
       "panel_condition": "input.advanced_barcoded",
       "choices": {
         "": "",
-        "SQK-16S024":"SQK-16S024",
-        "SQK-16S114-24":"SQK-16S114-24",
-        "SQK-NBD114-24":"SQK-NBD114-24",
-        "SQK-NBD114-96":"SQK-NBD114-96",
-        "SQK-PCB114-24":"SQK-PCB114-24",
-        "SQK-RBK114-24":"SQK-RBK114-24",
-        "SQK-RBK114-96":"SQK-RBK114-96",
-        "SQK-RPB114-24":"SQK-RPB114-24",
-        "TWIST-16-UDI":"TWIST-16-UDI",
-        "TWIST-96A-UDI":"TWIST-96A-UDI",
-        "VSK-PTC001":"VSK-PTC001",
-        "VSK-VMK001":"VSK-VMK001",
-        "VSK-VMK004":"VSK-VMK004",
-        "VSK-VPS001":"VSK-VPS001"
+        "SQK-16S024": "SQK-16S024",
+        "SQK-16S114-24": "SQK-16S114-24",
+        "SQK-NBD114-24": "SQK-NBD114-24",
+        "SQK-NBD114-96": "SQK-NBD114-96",
+        "SQK-PCB114-24": "SQK-PCB114-24",
+        "SQK-RBK114-24": "SQK-RBK114-24",
+        "SQK-RBK114-96": "SQK-RBK114-96",
+        "SQK-RPB114-24": "SQK-RPB114-24",
+        "TWIST-16-UDI": "TWIST-16-UDI",
+        "TWIST-96A-UDI": "TWIST-96A-UDI",
+        "VSK-PTC001": "VSK-PTC001",
+        "VSK-VMK001": "VSK-VMK001",
+        "VSK-VMK004": "VSK-VMK004",
+        "VSK-VPS001": "VSK-VPS001"
       },
       "help": "Barcoding kit name (required with --samplesheet)"
     },
@@ -144,7 +144,7 @@
       "label": "Clair3 platform",
       "required": false,
       "multiple": false,
-      "panel_condition": "input.snp",
+      "panel_condition": "input.snp && input.snp_caller == 'clair3'",
       "choices": {
         "ont": "ont",
         "hifi": "hifi",
@@ -158,18 +158,18 @@
       "label": "Clair3 model",
       "required": false,
       "value": "r1041_e82_400bps_hac_v500",
-      "panel_condition": "input.snp",
+      "panel_condition": "input.snp && input.snp_caller == 'clair3'",
       "help": "The specific Clair3 model name. Only used when --snp is specified. See available models in the Clair3 documentation."
     },
     {
-    "type": "selectInput",
-    "inputId": "deepvariant_model",
-    "label": "DeepVariant model",
-    "required": false,
-    "multiple": false,
-    "panel_condition": "input.snp",
-    "choices": {
-        "ONT_R104":"ONT_R104",
+      "type": "selectInput",
+      "inputId": "deepvariant_model",
+      "label": "DeepVariant model",
+      "required": false,
+      "multiple": false,
+      "panel_condition": "input.snp && input.snp_caller == 'deepvariant'",
+      "choices": {
+        "ONT_R104": "ONT_R104",
         "PACBIO": "PACBIO",
         "WGS": "WGS",
         "WES": "WES",
@@ -195,21 +195,21 @@
       "help": "Annotate variants using snpEff"
     },
     {
-      "type": "checkboxInput",    
-      "inputId": "sv",
-      "label": "Enable SV calling",
-      "required": false,
-      "value": false,
-      "help": "Enable structural variant calling with Sniffles2"
-    },
-    {
       "type": "textInput",
       "inputId": "anno_db",
       "label": "snpEff annotation database",
       "required": false,
       "value": "hg38",
-      "panel_condition": "input.annotate",
+      "panel_condition": "input.snp && input.annotate",
       "help": "snpEff annotation database to use"
+    },
+    {
+      "type": "checkboxInput",
+      "inputId": "sv",
+      "label": "Enable SV calling",
+      "required": false,
+      "value": false,
+      "help": "Enable structural variant calling with Sniffles2"
     },
     {
       "type": "checkboxInput",
