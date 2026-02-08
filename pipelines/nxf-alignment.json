@@ -36,7 +36,7 @@
       "inputId": "model",
       "label": "Dorado model",
       "required": false,
-      "value": "fast",
+      "value": "hac,5mCG_5hmCG",
       "panel_condition": "input.pod5",
       "help": "Dorado basecalling model to use. For modifications use for example 'hac,5mCG_5hmCG'"
     },
