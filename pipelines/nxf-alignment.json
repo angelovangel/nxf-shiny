@@ -4,6 +4,24 @@
   "url": "https://github.com/angelovangel/nxf-alignment",
   "shiny_inputs": [
     {
+      "type": "checkboxInput",
+      "inputId": "basecall",
+      "label": "Basecall only",
+      "required": false,
+      "value": false,
+      "panel_condition": "!input.report",
+      "help": "Only basecall reads, do not align or call variants"
+    },
+    {
+      "type": "checkboxInput",
+      "inputId": "report",
+      "label": "Basecall + report only",
+      "required": false,
+      "value": false,
+      "panel_condition": "!input.basecall",
+      "help": "Basecall reads and generate report, do not align or call variants"
+    },
+    {
       "type": "shinyDirButton",
       "inputId": "pod5",
       "id": "pod5",
@@ -20,7 +38,7 @@
       "required": false,
       "value": "fast",
       "panel_condition": "input.pod5",
-      "help": "Dorado basecalling model to use"
+      "help": "Dorado basecalling model to use. For modifications use for example 'hac,5mCG_5hmCG'"
     },
     {
       "type": "checkboxInput",
@@ -106,8 +124,8 @@
       "label": "Reference file",
       "title": "Reference file (fasta)",
       "multiple": false,
-      "required": true,
-      "help": "Path to reference FASTA (required unless -entry basecall is used)"
+      "panel_condition": "!input.basecall && !input.report",
+      "help": "Path to reference FASTA (required unless --basecall or --report is used)"
     },
     {
       "type": "shinyFilesButton",
@@ -117,6 +135,7 @@
       "title": "BED file",
       "required": false,
       "multiple": false,
+      "panel_condition": "!input.basecall && !input.report",
       "help": "BED file with regions (auto-generated from reference if omitted)"
     },
     {
@@ -125,6 +144,7 @@
       "label": "Enable SNP calling",
       "required": false,
       "value": false,
+      "panel_condition": "!input.basecall && !input.report",
       "help": "Enable variant calling on the aligned reads using Clair3 or DeepVariant"
     },
     {
@@ -209,7 +229,17 @@
       "label": "Enable SV calling",
       "required": false,
       "value": false,
+      "panel_condition": "!input.basecall && !input.report",
       "help": "Enable structural variant calling with Sniffles2"
+    },
+    {
+      "type": "checkboxInput",
+      "inputId": "mods",
+      "label": "Run base mod analysis",
+      "required": false,
+      "value": false,
+      "panel_condition": "!input.basecall && !input.report",
+      "help": "Run base modification analysis with modkit (modkit pileup)"
     },
     {
       "type": "checkboxInput",

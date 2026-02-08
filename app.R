@@ -491,7 +491,7 @@ server <- function(input, output, session) {
     write(json_to_write, file = fs::path(instance_path, "params-file.json"))
 
     # 1. Launch new clean! tmux session
-    args1 <- c("new", "-d", "-s", session_id, "-c", instance_path, "-x", "120", "-y", "30", "'bash --login'") # add 'bash --login' to prevent R from inheriting from previous tmux sessions?
+    args1 <- c("new", "-d", "-s", session_id, "-c", instance_path, "-x", "120", "-y", "30", "'zsh --login'") # add 'bash --login' to prevent R from inheriting from previous tmux sessions?
     system2("tmux", args = args1)
 
     # 2. Start pipeline in new session
