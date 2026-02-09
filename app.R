@@ -111,7 +111,8 @@ server <- function(input, output, session) {
     tmux_time = NA,
     pipeline_time = NA,
     status = NA,
-    results = NA
+    results = NA,
+    size = NA
   )
 
   # check nextflow, docker and tmux are on path
@@ -331,13 +332,22 @@ server <- function(input, output, session) {
         arrange(started)
 
       # Add direct download link if tarball exists
+      # add also tarball size
       df$results <- vapply(df$session_id, function(id) {
         tar_name <- paste0(id, ".tar.gz")
         tar_path <- file.path("www", tar_name)
         if (!is.na(id) && file.exists(tar_path)) {
           paste0('<a href="', tar_name, '" download>', id, "</a>")
         } else {
-          "NA"
+          "-"
+        }
+      }, character(1))
+      df$size <- vapply(df$session_id, function(id) {
+        tar_path <- file.path("www", paste0(id, ".tar.gz"))
+        if (!is.na(id) && file.exists(tar_path)) {
+          pretty_bytes(file.size(tar_path), style = "6")
+        } else {
+          "-"
         }
       }, character(1))
       df
