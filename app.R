@@ -401,20 +401,20 @@ server <- function(input, output, session) {
   # tar whnen ready and place in www
   ##################################
   # decide if ready by looking at the nxflog (OK for finished)
-  observe({
-    df <- tmux_sessions()
-    for (id in df$session_id) {
-      if (!is.na(id) && pipeline_finished(df = df, id = id)) {
-        # if ( !is.na(id) && (df[df$session_id == id, ]$status == 'OK') ) {
-        tar_path <- file.path("www", paste0(id, ".tar.gz"))
-        outdir <- fs::path("instances", id)
-        if (!file.exists(tar_path) && dir.exists(outdir)) {
-          # Create tarball in www folder
-          system2("tar", args = c("-czf", tar_path, "--exclude='work'", "-C", "instances", id))
-        }
-      }
-    }
-  })
+  # observe({
+  #   df <- tmux_sessions()
+  #   for (id in df$session_id) {
+  #     if (!is.na(id) && pipeline_finished(df = df, id = id)) {
+  #       # if ( !is.na(id) && (df[df$session_id == id, ]$status == 'OK') ) {
+  #       tar_path <- file.path("www", paste0(id, ".tar.gz"))
+  #       outdir <- fs::path("instances", id)
+  #       if (!file.exists(tar_path) && dir.exists(outdir)) {
+  #         # Create tarball in www folder
+  #         system2("tar", args = c("-czf", tar_path, "--exclude='work'", "-C", "instances", id))
+  #       }
+  #     }
+  #   }
+  # })
   ##################################
 
 
@@ -504,14 +504,16 @@ server <- function(input, output, session) {
     args1 <- c("new", "-d", "-s", session_id, "-c", instance_path, "-x", "120", "-y", "30", "'zsh --login'") # add 'bash --login' to prevent R from inheriting from previous tmux sessions?
     system2("tmux", args = args1)
 
-    # 2. Start pipeline in new session
+    # 2. Start pipeline in new session and tar results on success
     tmux_command <- paste(
       "nextflow", "run", json()$fullname,
       "-params-file", file.path(fs::path_abs(instance_path), "params-file.json"),
       profile_rv(),
       revision_rv(),
-      # '-o', file.path('output', session_id),
-      # '-w', file.path('work', session_id), not needed, as there is an unique instance path
+      "-o", file.path(fs::path_abs(instance_path), "output"),
+      "-w", file.path(fs::path_abs(instance_path), "work"),
+      "&&",
+      "tar", "-czf", file.path("../../www", paste0(session_id, ".tar.gz")), "--exclude='work'", "-C", "..", session_id,
       sep = " "
     )
 
