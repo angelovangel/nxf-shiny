@@ -268,8 +268,10 @@ server <- function(input, output, session) {
         started = str_split_i(tmuxinfo, " ", 1) %>% as.numeric() %>% as.POSIXct(),
         tmux_time = NA,
         pipeline_time = NA,
+        pid = str_split_i(tmuxinfo, " ", 7),
         status = NA,
-        results = NA
+        results = NA,
+        size = NA
       )
 
       # filter out tmux sessions that don't belong to this app
@@ -331,12 +333,22 @@ server <- function(input, output, session) {
         ) %>%
         arrange(started)
 
-      # Add direct download link if tarball exists
-      # add also tarball size
-      df$results <- vapply(df$session_id, function(id) {
+      # Add direct download link if tarball exists AND no processes are running in the tmux session
+      df$results <- vapply(seq_len(nrow(df)), function(i) {
+        id <- df$session_id[i]
+        pid <- df$pid[i]
+
         tar_name <- paste0(id, ".tar.gz")
         tar_path <- file.path("www", tar_name)
-        if (!is.na(id) && file.exists(tar_path)) {
+
+        # Check if shell is idle (no child processes)
+        is_idle <- FALSE
+        if (!is.na(pid)) {
+          children <- system2("pgrep", args = c("-P", pid), stdout = TRUE)
+          if (length(children) == 0) is_idle <- TRUE
+        }
+
+        if (!is.na(id) && file.exists(tar_path) && is_idle) {
           paste0('<a href="', tar_name, '" download>', id, "</a>")
         } else {
           "-"
@@ -397,26 +409,6 @@ server <- function(input, output, session) {
     )
   })
   ##################################
-
-  # tar whnen ready and place in www
-  ##################################
-  # decide if ready by looking at the nxflog (OK for finished)
-  # observe({
-  #   df <- tmux_sessions()
-  #   for (id in df$session_id) {
-  #     if (!is.na(id) && pipeline_finished(df = df, id = id)) {
-  #       # if ( !is.na(id) && (df[df$session_id == id, ]$status == 'OK') ) {
-  #       tar_path <- file.path("www", paste0(id, ".tar.gz"))
-  #       outdir <- fs::path("instances", id)
-  #       if (!file.exists(tar_path) && dir.exists(outdir)) {
-  #         # Create tarball in www folder
-  #         system2("tar", args = c("-czf", tar_path, "--exclude='work'", "-C", "instances", id))
-  #       }
-  #     }
-  #   }
-  # })
-  ##################################
-
 
   # --- Save the input state and start ---
   observeEvent(input$start, {
