@@ -505,7 +505,7 @@ server <- function(input, output, session) {
       "-o", file.path(fs::path_abs(instance_path), "output"),
       "-w", file.path(fs::path_abs(instance_path), "work"),
       "&&",
-      "tar", "--use-compress-program", "pigz", "-czf", file.path("../../www", paste0(session_id, ".tar.gz")), "--exclude='work'", "-C", "..", session_id,
+      "tar", "-czf", file.path("../../www", paste0(session_id, ".tar.gz")), "--exclude='work'", "-C", "..", session_id,
       sep = " "
     )
 
