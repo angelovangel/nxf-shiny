@@ -77,7 +77,7 @@ ui <- page_navbar(
         # rel="noopener noreferrer",
         bs_icon("github")
       ),
-      style = "font-size: 0.85rem; font-weight: normal; margin-left: 8em; color: #4B5563;"
+      style = "font-size: 0.85rem; font-weight: normal; margin-left: 10em; color: #4B5563;"
     )
   ),
   sidebar = sidebar,
@@ -505,7 +505,7 @@ server <- function(input, output, session) {
       "-o", file.path(fs::path_abs(instance_path), "output"),
       "-w", file.path(fs::path_abs(instance_path), "work"),
       "&&",
-      "tar", "-czf", file.path("../../www", paste0(session_id, ".tar.gz")), "--exclude='work'", "-C", "..", session_id,
+      "tar", "--use-compress-program", "pigz", "-czf", file.path("../../www", paste0(session_id, ".tar.gz")), "--exclude='work'", "-C", "..", session_id,
       sep = " "
     )
 
@@ -552,6 +552,7 @@ server <- function(input, output, session) {
     args <- paste0("kill-session -t ", session_selected)
     if (!is.null(row_selected())) {
       # kill session
+      showNotification(ui = paste0("Session ", session_selected, " will be removed!"), type = "default", duration = 3)
       system2("tmux", args = args)
 
 
@@ -566,13 +567,7 @@ server <- function(input, output, session) {
       if (dir.exists(instance)) {
         unlink(instance, recursive = TRUE)
       }
-
-      # # Remove work directory
-      # outdir <- file.path("work", session_selected)
-      # if (dir.exists(outdir)) {
-      #   unlink(outdir, recursive = TRUE)
-      # }
-      showNotification(ui = paste0("Session ", session_selected, " killed!"), type = "message")
+      showNotification(ui = paste0("Session ", session_selected, " removed!"), type = "message", duration = 3)
     } else {
       showNotification("Select session first!", type = "error")
     }
