@@ -552,7 +552,7 @@ server <- function(input, output, session) {
     args <- paste0("kill-session -t ", session_selected)
     if (!is.null(row_selected())) {
       # kill session
-      showNotification(ui = paste0("Session ", session_selected, " will be removed!"), type = "default", duration = 3)
+      showNotification(ui = paste0("Removing session ", session_selected, " ..."), type = "default", duration = 3)
       system2("tmux", args = args)
 
 
