@@ -1,0 +1,141 @@
+{
+  "name": "nxf-savont",
+  "fullname": "angelovangel/nxf-savont",
+  "url": "https://github.com/angelovangel/nxf-savont",
+  "shiny_inputs": [
+  
+    {
+      "type": "shinyDirButton",
+      "inputId": "pod5",
+      "id": "pod5",
+      "label": "POD5 folder",
+      "title": "Select folder containing pod5 files",
+      "panel_condition": "!input.reads",
+      "help": "Folder containing pod5 files to be basecalled",
+      "required": false
+    },
+    {
+      "type": "textInput",
+      "inputId": "model",
+      "label": "Dorado model",
+      "required": false,
+      "value": "hac,5mCG_5hmCG",
+      "panel_condition": "input.pod5",
+      "help": "Dorado basecalling model to use. For modifications use for example 'hac,5mCG_5hmCG'"
+    },
+    {
+      "type": "textInput",
+      "inputId": "samplename",
+      "label": "Sample name",
+      "required": false,
+      "value": "",
+      "panel_condition": "input.pod5",
+      "help": "Samplename (if not provided, sample name is obtained from the pod5 file)"
+    },
+    {
+      "type": "shinyDirButton",
+      "inputId": "reads",
+      "id": "reads",
+      "label": "FASTQ/BAM reads",
+      "title": "Select folder with FASTQ/BAM files",
+      "multiple": false,
+      "required": false,
+      "panel_condition": "!input.pod5",
+      "help": "Directory with reads (BAM/FASTQ files, skips basecalling). One file is one sample."
+    },
+    {
+      "type": "checkboxInput",
+      "inputId": "barcoded",
+      "label": "Barcoded run",
+      "required": false,
+      "value": false,
+      "panel_condition": "input.pod5"
+    },
+    {
+      "type": "selectInput",
+      "inputId": "kit",
+      "label": "Barcoding kit",
+      "required": false,
+      "multiple": false,
+      "panel_condition": "input.barcoded",
+      "choices": {
+        "": "",
+        "SQK-16S024": "SQK-16S024",
+        "SQK-16S114-24": "SQK-16S114-24",
+        "SQK-NBD114-24": "SQK-NBD114-24",
+        "SQK-NBD114-96": "SQK-NBD114-96",
+        "TWIST-16-UDI": "TWIST-16-UDI",
+        "TWIST-96A-UDI": "TWIST-96A-UDI"
+      },
+      "help": "Barcoding kit name (required with --samplesheet)"
+    },
+    {
+      "type": "fileInput",
+      "inputId": "samplesheet",
+      "label": "Samplesheet",
+      "required": false,
+      "multiple": false,
+      "accept": [
+        ".csv"
+      ],
+      "placeholder": "Upload samplesheet",
+      "panel_condition": "input.barcoded",
+      "help": "CSV with columns: sample,barcode (required with --kit)"
+    },
+    {
+      "type": "numericInput",
+      "inputId": "subsample",
+      "label": "Subsample reads",
+      "required": false,
+      "value": 1,
+      "min": 0.1,
+      "max": 1,
+      "step": 0.1
+    },
+    {
+      "type": "checkboxInput",
+      "inputId": "norm",
+      "label": "Rarefy reads",
+      "required": false,
+      "value": false,
+      "help": "Rarefy reads to sample with smallest read count"
+    },
+    
+    {
+      "type": "selectInput",
+      "inputId": "db",
+      "label": "16S database",
+      "required": false,
+      "multiple": false,
+      "choices": {
+        "emu": "emu",
+        "silva": "silva"
+      },
+      "help": "16S database to use for Savont classification"
+    },
+  
+    {
+      "type": "checkboxInput",
+      "inputId": "advanced",
+      "label": "Advanced",
+      "required": false,
+      "value": false
+    },
+    {
+      "type": "numericInput",
+      "inputId": "cpus",
+      "label": "Number of CPUs",
+      "required": false,
+      "value": 64,
+      "panel_condition": "input.advanced"
+    },
+    {
+      "type": "textInput",
+      "inputId": "profile",
+      "label": "Profile",
+      "required": false,
+      "value": "",
+      "panel_condition": "input.advanced"
+    }
+  ]
+}
