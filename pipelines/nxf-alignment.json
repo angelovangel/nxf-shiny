@@ -249,6 +249,15 @@
       "value": false
     },
     {
+      "type": "textInput",
+      "inputId": "mmap2",
+      "label": "Additional minimap2 parameters",
+      "required": false,
+      "value": "-ax map-ont",
+      "panel_condition": "input.advanced",
+      "help": "Additional minimap2 parameters to use for alignment. Default is '-ax map-ont'. Add paramters separated by space."
+    },
+    {
       "type": "numericInput",
       "inputId": "cpus",
       "label": "Number of CPUs",
