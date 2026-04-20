@@ -54,3 +54,4 @@ www/*.tar.gz
 instances
 output
 .DS_Store
+credentials.rds

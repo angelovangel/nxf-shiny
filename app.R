@@ -12,6 +12,8 @@ library(digest)
 library(hover)
 library(reactable)
 library(prettyunits)
+library(shinymanager)
+library(fs)
 
 source("global.R")
 
@@ -102,7 +104,17 @@ ui <- page_navbar(
   card1, card2
 )
 
+### secure app -----------------------------###
+ui <- secure_app(ui,theme = "simplex")
+credentials <- readRDS("credentials.rds")
+
 server <- function(input, output, session) {
+  
+  ### secure app -----------------------------###
+  res_auth <- secure_server(
+    check_credentials = check_credentials(credentials)
+  )
+
   # tmux session template df
   empty_df <- data.frame(
     session_id = NA,
@@ -125,6 +137,7 @@ server <- function(input, output, session) {
 
   # currently selected pipeline
   json <- reactive({
+    req(input$pipelines)
     read_json(path = fs::path("pipelines", input$pipelines), simplifyDataFrame = FALSE)
   })
 
@@ -518,6 +531,7 @@ server <- function(input, output, session) {
 
   # Show session
   observeEvent(input$show_session, {
+    req(row_selected())
     withCallingHandlers(
       {
         shinyjs::html(id = "stdout", "")
@@ -547,6 +561,7 @@ server <- function(input, output, session) {
   # kill session (and delete data)
   ############################################
   observeEvent(input$kill, {
+    req(row_selected())
     session_selected <- tmux_sessions()[row_selected(), ]$session_id
 
     args <- paste0("kill-session -t ", session_selected)
