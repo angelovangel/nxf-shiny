@@ -249,6 +249,15 @@
       "value": false
     },
     {
+      "type": "checkboxInput",
+      "inputId": "sylph",
+      "label": "sylph ANI",
+      "required": false,
+      "value": false,
+      "panel_condition": "input.advanced",
+      "help": "Set to true to enable Sylph profiling to estimate read ANI (Average Nucleotide Identity) of the reads to the reference."
+    },
+    {
       "type": "textInput",
       "inputId": "mmap2",
       "label": "Additional minimap2 parameters",
