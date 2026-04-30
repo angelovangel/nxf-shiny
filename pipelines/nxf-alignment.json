@@ -152,7 +152,7 @@
       "inputId": "snp_caller",
       "label": "SNP caller",
       "required": false,
-      "panel_condition": "input.snp",
+      "panel_condition": "input.snp && !input.basecall && !input.report",
       "choices": {
         "clair3": "clair3",
         "deepvariant": "deepvariant"
@@ -164,7 +164,7 @@
       "label": "Clair3 platform",
       "required": false,
       "multiple": false,
-      "panel_condition": "input.snp && input.snp_caller == 'clair3'",
+      "panel_condition": "input.snp && !input.basecall && !input.report && input.snp_caller == 'clair3'",
       "choices": {
         "ont": "ont",
         "hifi": "hifi",
@@ -178,7 +178,7 @@
       "label": "Clair3 model",
       "required": false,
       "value": "r1041_e82_400bps_hac_v500",
-      "panel_condition": "input.snp && input.snp_caller == 'clair3'",
+      "panel_condition": "input.snp && !input.basecall && !input.report && input.snp_caller == 'clair3'",
       "help": "The specific Clair3 model name. Only used when --snp is specified. See available models in the Clair3 documentation."
     },
     {
@@ -202,7 +202,7 @@
       "label": "Phase variants",
       "required": false,
       "value": false,
-      "panel_condition": "input.snp",
+      "panel_condition": "input.snp && !input.basecall && !input.report",
       "help": "Phase SNP variants using WhatsHap, only diploid cases supported"
     },
     {
@@ -211,7 +211,7 @@
       "label": "Annotate variants",
       "required": false,
       "value": false,
-      "panel_condition": "input.snp",
+      "panel_condition": "input.snp && !input.basecall && !input.report",
       "help": "Annotate variants using snpEff"
     },
     {
@@ -231,6 +231,35 @@
       "value": false,
       "panel_condition": "!input.basecall && !input.report",
       "help": "Enable structural variant calling with Sniffles2"
+    },
+    {
+      "type": "checkboxInput",
+      "inputId": "pgx",
+      "label": "Run PGx analysis",
+      "required": false,
+      "value": false,
+      "panel_condition": "input.snp && !input.basecall && !input.report",
+      "help": "Run PGx analysis with PAnno and PharmCAT"
+    },
+    {
+      "type": "selectInput",
+      "inputId": "population",
+      "label": "Population to use for PAnno analysis",
+      "required": false,
+      "multiple": false,
+      "panel_condition": "input.pgx && input.snp && !input.basecall && !input.report",
+      "choices": {
+        "": "",
+        "AAC": "AAC",
+        "AME": "AME",
+        "EAS": "EAS",
+        "EUR": "EUR",
+        "LAT": "LAT",
+        "NEA": "NEA",
+        "OCE": "OCE",
+        "SAS": "SAS",
+        "SSA": "SSA"
+      }
     },
     {
       "type": "checkboxInput",
@@ -254,7 +283,7 @@
       "label": "sylph ANI",
       "required": false,
       "value": false,
-      "panel_condition": "input.advanced",
+      "panel_condition": "input.advanced && !input.basecall && !input.report",
       "help": "Set to true to enable Sylph profiling to estimate read ANI (Average Nucleotide Identity) of the reads to the reference."
     },
     {
@@ -263,7 +292,7 @@
       "label": "Additional minimap2 parameters",
       "required": false,
       "value": "-ax map-ont",
-      "panel_condition": "input.advanced",
+      "panel_condition": "input.advanced && !input.basecall && !input.report",
       "help": "Additional minimap2 parameters to use for alignment. Default is '-ax map-ont'. Add paramters separated by space."
     },
     {
