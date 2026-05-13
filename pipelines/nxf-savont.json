@@ -60,6 +60,7 @@
       "panel_condition": "input.barcoded",
       "choices": {
         "": "",
+        "SQK-MAB114-24": "SQK-MAB114-24",
         "SQK-16S024": "SQK-16S024",
         "SQK-16S114-24": "SQK-16S114-24",
         "SQK-NBD114-24": "SQK-NBD114-24",
