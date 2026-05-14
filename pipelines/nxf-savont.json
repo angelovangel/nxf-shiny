@@ -113,7 +113,8 @@
       "multiple": false,
       "choices": {
         "emu": "emu",
-        "silva": "silva"
+        "silva": "silva",
+        "greengenes": "greengenes"
       },
       "help": "16S database to use for Savont classification"
     },
