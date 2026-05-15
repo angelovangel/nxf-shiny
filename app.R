@@ -357,7 +357,7 @@ server <- function(input, output, session) {
         # Check if shell is idle (no child processes)
         is_idle <- FALSE
         if (!is.na(pid)) {
-          children <- system2("pgrep", args = c("-P", pid), stdout = TRUE)
+          children <- suppressWarnings(system2("pgrep", args = c("-P", pid), stdout = TRUE))
           if (length(children) == 0) is_idle <- TRUE
         }
 
