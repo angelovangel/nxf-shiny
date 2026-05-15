@@ -511,6 +511,7 @@ server <- function(input, output, session) {
 
     # 2. Start pipeline in new session and tar results on success
     tmux_command <- paste(
+      "cd", fs::path_abs(instance_path), "&&",
       "nextflow", "run", json()$fullname,
       "-params-file", file.path(fs::path_abs(instance_path), "params-file.json"),
       profile_rv(),
