@@ -159,3 +159,14 @@ a:hover {
     padding-top: 0.75rem !important;
     padding-bottom: 0.75rem !important;
 }
+
+/* Sticky Controls */
+.sticky-controls {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: #F9FAFB;
+    padding: 10px 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #E5E7EB;
+}

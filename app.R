@@ -94,13 +94,13 @@ ui <- page_navbar(
   ),
   ########## controls
   tags$div(
+    class = "sticky-controls",
     hover_action_button("start", "Start", icon = icon("play"), button_animation = "overline-reveal"), # style = "height: 15px;"),
     hover_action_button("show_session", "Show session", icon = icon("expand"), button_animation = "overline-reveal"),
     hover_reload_button("reset", "Reset", icon = icon("rotate"), button_animation = "overline-reveal"),
     hover_action_button("kill", "Kill session", icon = icon("xmark"), style = "color:#0047AB;", button_animation = "overline-reveal"),
   ),
   ########## controls
-  tags$hr(),
   card1, card2
 )
 
