@@ -3,7 +3,6 @@
   "fullname": "angelovangel/nxf-savont",
   "url": "https://github.com/angelovangel/nxf-savont",
   "shiny_inputs": [
-  
     {
       "type": "shinyDirButton",
       "inputId": "pod5",
@@ -104,7 +103,6 @@
       "help": "Rarefy reads to sample with smallest read count",
       "panel_condition": "input.subsample == 1.0"
     },
-    
     {
       "type": "selectInput",
       "inputId": "db",
@@ -118,7 +116,12 @@
       },
       "help": "16S database to use for Savont classification"
     },
-  
+    {
+      "type": "textInput",
+      "inputId": "neg",
+      "label": "Negative controls",
+      "help": "Comma separated list of negative control sample names (e.g., 'neg1,neg2'). If provided, these samples will be used to identify potential contaminants using decontam."
+    },
     {
       "type": "checkboxInput",
       "inputId": "advanced",
