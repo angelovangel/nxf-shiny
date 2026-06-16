@@ -11,6 +11,30 @@ pipeline_finished <- function(id, df) {
   #file.exists(file.path("output", session_id, "00-sample-status-summary.html"))
 }
 
+# Parse the tmux pane output to extract Nextflow's own progress numbers.
+# Nextflow writes lines like:  [a1/b2c3] process > MINIMAP   [37%]  6 of 96
+# We capture the pane, find all "N of M" pairs, and sum them.
+nxf_tmux_progress <- function(session_id) {
+  result <- processx::run(
+    "tmux", args = c("capture-pane", "-p", "-t", session_id),
+    error_on_status = FALSE
+  )
+  if (result$status != 0 || nchar(result$stdout) == 0) {
+    return(list(done = 0L, total = 0L))
+  }
+  lines <- strsplit(result$stdout, "\n", fixed = TRUE)[[1]]
+  # Match lines with Nextflow's progress format: "N of M"
+  # e.g.  [37%]  6 of 96   or  [100%] 12 of 12 ✔
+  progress_lines <- grep("\\bof\\b", lines, value = TRUE)
+  matches <- regmatches(progress_lines, gregexpr("(\\d+) of (\\d+)", progress_lines, perl = TRUE))
+  pairs <- unlist(matches)
+  if (length(pairs) == 0) return(list(done = 0L, total = 0L))
+  m <- regmatches(pairs, regexec("(\\d+) of (\\d+)", pairs, perl = TRUE))
+  done  <- sum(as.integer(sapply(m, `[`, 2)), na.rm = TRUE)
+  total <- sum(as.integer(sapply(m, `[`, 3)), na.rm = TRUE)
+  list(done = done, total = total)
+}
+
 # return nextflow log table for a nextflow log in a specific folder
 # DO NOT invoke nextflow log, just read .nextflow/history
 nxf_log <- function(path) {

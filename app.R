@@ -320,7 +320,20 @@ server <- function(input, output, session) {
         if (length(status_info) == 0) {
           "<span style='color:orange !important; font-weight: bold;'> STARTING </span>"
         } else if (str_trim(status_info) == "-") {
-          "<span style='color:orange !important; font-weight: bold;'> RUNNING </span>"
+          # RUNNING: read Nextflow's own progress lines from the tmux pane
+          prog    <- nxf_tmux_progress(x)
+          n_done  <- prog$done
+          n_total <- prog$total
+          pct <- if (n_total > 0) round(100 * n_done / n_total) else 0
+          paste0(
+            "<div style='min-width:120px;'>",
+            "<span style='color:orange;font-weight:bold;font-size:0.85em;'> RUNNING</span>",
+            "<span style='color:#6b7280;font-size:0.8em;margin-left:4px;'>", n_done, "/", n_total, " tasks</span>",
+            "<div style='background:#e5e7eb;border-radius:4px;height:5px;margin-top:3px;'>",
+            "<div style='background:#f59e0b;border-radius:4px;height:5px;width:", pct, "%;",
+            "transition:width 0.5s ease;'></div>",
+            "</div></div>"
+          )
         } else if (str_trim(status_info) == "OK") {
           "<span style='color:green !important; font-weight: bold;'> OK </span>"
         } else if (str_trim(status_info) == "ERR") {
@@ -407,7 +420,7 @@ server <- function(input, output, session) {
         started = colDef(format = colFormat(datetime = T, locales = "en-GB"), minWidth = 150),
         pipeline = colDef(minWidth = 200),
         results = colDef(html = TRUE),
-        status = colDef(html = TRUE, minWidth = 80)
+        status = colDef(html = TRUE, minWidth = 200)
       )
     )
   })
