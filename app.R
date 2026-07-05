@@ -95,7 +95,8 @@ ui <- page_navbar(
   ########## controls
   tags$div(
     class = "sticky-controls",
-    hover_action_button("start", "Start", icon = icon("play"), button_animation = "overline-reveal"), # style = "height: 15px;"),
+    hover_action_button("start", "Start", icon = icon("play"), button_animation = "overline-reveal"),
+    shinyDirButton("copy_output_dir", "Copy output to", title = "Select a directory to receive copied pipeline output"),
     hover_action_button("show_session", "Show session", icon = icon("expand"), button_animation = "overline-reveal"),
     hover_reload_button("reset", "Reset", icon = icon("rotate"), button_animation = "overline-reveal"),
     hover_action_button("kill", "Kill session", icon = icon("xmark"), style = "color:#0047AB;", button_animation = "overline-reveal"),
@@ -154,7 +155,22 @@ server <- function(input, output, session) {
 
 
   # special case shinyFiles - shinyDirChoose bindings in server
-  # shinyDirChoose(input, 'fastq', root=c(root=Sys.getenv('HOME')))
+  shinyDirChoose(input, "copy_output_dir", roots = c(home = Sys.getenv("HOME"), mnt = "/mnt"), allowDirCreate = FALSE)
+
+  observeEvent(input$copy_output_dir, {
+    selected_copy_dir <- parseDirPath(
+      roots = c(home = Sys.getenv("HOME"), mnt = "/mnt"),
+      selection = input$copy_output_dir
+    )
+
+    if (length(selected_copy_dir) > 0 && nzchar(selected_copy_dir[1])) {
+      showNotification(ui = paste0("Copy output to: ", selected_copy_dir[1]), type = "message", duration = 5)
+      shinyjs::runjs("$('#copy_output_dir').addClass('selected-file-button');")
+    } else {
+      shinyjs::runjs("$('#copy_output_dir').removeClass('selected-file-button');")
+    }
+  }, ignoreNULL = FALSE)
+
   observeEvent(input$pipelines, {
     bind_shinyfiles(input = input, config = json()$shiny_inputs)
   })
@@ -522,21 +538,41 @@ server <- function(input, output, session) {
     args1 <- c("new", "-d", "-s", session_id, "-c", instance_path, "-x", "120", "-y", "30", "'zsh --login'") # add 'bash --login' to prevent R from inheriting from previous tmux sessions?
     system2("tmux", args = args1)
 
+    copy_target <- NULL
+    selected_copy_dir <- parseDirPath(
+      roots = c(home = Sys.getenv("HOME"), mnt = "/mnt"),
+      selection = input$copy_output_dir
+    )
+
+    if (length(selected_copy_dir) > 0 && nzchar(selected_copy_dir[1])) {
+      copy_target <- selected_copy_dir[1]
+    }
+
+    copy_cmd <- ""
+    if (!is.null(copy_target)) {
+      fs::dir_create(copy_target, recurse = TRUE)
+      copy_cmd <- paste(
+        "&& mkdir -p", shQuote(copy_target),
+        "&& cp -R", shQuote(file.path(fs::path_abs(instance_path), "output")), shQuote(file.path(copy_target, "output"))
+      )
+    }
+
     # 2. Start pipeline in new session and tar results on success
     tmux_command <- paste(
-      "cd", fs::path_abs(instance_path), "&&",
+      "cd", shQuote(fs::path_abs(instance_path)), "&&",
       "nextflow", "run", json()$fullname,
-      "-params-file", file.path(fs::path_abs(instance_path), "params-file.json"),
+      "-params-file", shQuote(file.path(fs::path_abs(instance_path), "params-file.json")),
       profile_rv(),
       revision_rv(),
-      "-o", file.path(fs::path_abs(instance_path), "output"),
-      "-w", file.path(fs::path_abs(instance_path), "work"),
+      "-o", shQuote(file.path(fs::path_abs(instance_path), "output")),
+      "-w", shQuote(file.path(fs::path_abs(instance_path), "work")),
+      copy_cmd,
       "&&",
-      "tar", "-czf", file.path("../../www", paste0(session_id, ".tar.gz")), "--exclude='work'", "-C", "..", session_id,
+      "tar", "-czf", shQuote(file.path("../../www", paste0(session_id, ".tar.gz"))), "--exclude='work'", "-C", "..", session_id,
       sep = " "
     )
 
-    tmux_command <- paste0("'", tmux_command, "'") # wrap the whole command in single quotes
+    tmux_command <- paste0('"', tmux_command, '"')
     args2 <- c("send-keys", "-t", session_id, tmux_command, "C-m")
     system2("tmux", args = args2)
 
