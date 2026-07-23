@@ -4,12 +4,12 @@
     "inputId": "pipelines",
     "label": "Select pipeline to run",
     "multiple": false,
-    
     "choices": {
       "nxf-alignment": "nxf-alignment.json",
       "nxf-savont": "nxf-savont.json",
       "nxf-minimapper": "nxf-minimapper.json",
       "nxf-tgs": "nxf-tgs.json",
+      "faster-report": "faster-report.json",
       "epi2me-wf-alignment": "epi2me-wf-alignment.json",
       "nf-core-bacass": "nf-core-bacass.json"
     }

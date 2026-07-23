@@ -1,0 +1,101 @@
+{
+  "name": "faster-report",
+  "fullname": "angelovangel/faster-report",
+  "url": "https://github.com/angelovangel/faster-report",
+  "shiny_inputs": [
+    {
+      "type": "shinyDirButton",
+      "inputId": "reads",
+      "id": "reads",
+      "label": "Select reads folder",
+      "title": "Select folder containing FASTQ/BAM files",
+      "help": "Folder containing FASTQ or BAM files. BAM files are automatically converted to FASTQ.",
+      "required": true
+    },
+    {
+      "type": "selectInput",
+      "inputId": "type",
+      "label": "Platform type",
+      "required": false,
+      "multiple": false,
+      "choices": [
+        "",
+        "ont",
+        "illumina",
+        "pacbio"
+      ],
+      "help": "Sequencing platform. Auto-detected from FASTQ header if not specified."
+    },
+    {
+      "type": "textInput",
+      "inputId": "user",
+      "label": "User",
+      "required": false,
+      "value": "",
+      "help": "User name to include in the report"
+    },
+    {
+      "type": "textInput",
+      "inputId": "outfile",
+      "label": "Output filename",
+      "required": false,
+      "value": "faster-report.html",
+      "help": "Name of the output HTML report file"
+    },
+    {
+      "type": "checkboxInput",
+      "inputId": "advanced",
+      "label": "Advanced",
+      "required": false,
+      "value": false
+    },
+    {
+      "type": "textInput",
+      "inputId": "rundate",
+      "label": "Run date",
+      "required": false,
+      "value": "",
+      "help": "Run date (auto-detected from FASTQ header if not provided)",
+      "panel_condition": "input.advanced"
+    },
+    {
+      "type": "textInput",
+      "inputId": "flowcell",
+      "label": "Flowcell ID",
+      "required": false,
+      "value": "",
+      "help": "Flowcell ID (auto-detected from FASTQ header if not provided)",
+      "panel_condition": "input.advanced"
+    },
+    {
+      "type": "textInput",
+      "inputId": "basecall",
+      "label": "Basecaller model",
+      "required": false,
+      "value": "",
+      "help": "Basecaller model (auto-detected from FASTQ header if not provided)",
+      "panel_condition": "input.advanced"
+    },
+    {
+      "type": "numericInput",
+      "inputId": "subsample",
+      "label": "Subsample fraction",
+      "required": false,
+      "value": 1.0,
+      "min": 0.01,
+      "max": 1.0,
+      "step": 0.05,
+      "help": "Fraction of reads to subsample (0.01-1.0). Use 1.0 for no subsampling.",
+      "panel_condition": "input.advanced"
+    },
+    {
+      "type": "checkboxInput",
+      "inputId": "save_raw",
+      "label": "Save raw data",
+      "required": false,
+      "value": false,
+      "help": "Save the raw faster/faster2 output files in the output directory",
+      "panel_condition": "input.advanced"
+    }
+  ]
+}
