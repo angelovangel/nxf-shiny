@@ -129,14 +129,37 @@ create_conditional_ui <- function(config) {
 # that is shinyDirChoose(input, 'fastq_pass', root=c(root=Sys.getenv('HOME')), session = session)
 
 bind_shinyfiles <- function(config, input) {
-  # which params are shinyDirButton or shinyFilesButton, get their id and return shinyDirChoose(input, id, ...)
-  lapply(config, function(p){
-    if (str_detect(string = p$type, pattern = "shinyDirButton")) {
-      shinyDirChoose(input, p$inputId, roots = c(home = Sys.getenv('HOME'), mnt = '/mnt'), allowDirCreate = FALSE)
-    } else if (str_detect(string = p$type, pattern = "shinyFilesButton")) {
-      shinyFileChoose(input, p$inputId, roots = c(home = Sys.getenv('HOME'), mnt = '/mnt'))
+  # Determine a usable home directory inside the container. Fall back to
+  # fs::path_home(), /home/shiny (common in images), or "/" if nothing else.
+  home_env <- Sys.getenv('HOME', unset = NA)
+  if (is.na(home_env) || !dir.exists(home_env)) {
+    home_try <- NA
+    try(
+      home_try <- fs::path_home(),
+      silent = TRUE
+    )
+    if (!is.na(home_try) && dir.exists(home_try)) {
+      home <- home_try
+    } else if (dir.exists('/home/shiny')) {
+      home <- '/home/shiny'
     } else {
-      return()
+      home <- '/home'
+    }
+    warning('HOME not set or not accessible in container; falling back to: ', home)
+  } else {
+    home <- home_env
+  }
+
+  roots <- list(home = home, mnt = '/mnt')
+
+  lapply(config, function(p){
+    if (is.null(p$type)) return(invisible(NULL))
+    if (str_detect(string = p$type, pattern = "shinyDirButton")) {
+      shinyFiles::shinyDirChoose(input, p$inputId, roots = roots, allowDirCreate = FALSE)
+    } else if (str_detect(string = p$type, pattern = "shinyFilesButton")) {
+      shinyFiles::shinyFileChoose(input, p$inputId, roots = roots)
+    } else {
+      invisible(NULL)
     }
   })
 }
