@@ -96,6 +96,14 @@
       "value": false,
       "help": "Save the raw faster/faster2 output files in the output directory",
       "panel_condition": "input.advanced"
+    },
+    {
+      "type": "textInput",
+      "inputId": "profile",
+      "label": "Profile",
+      "required": false,
+      "value": "",
+      "panel_condition": "input.advanced"
     }
   ]
 }
