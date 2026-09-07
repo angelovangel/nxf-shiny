@@ -38,9 +38,12 @@ card1 <- card(
     class = "bg-secondary",
     tags$a("Sessions", tooltip(bsicons::bs_icon("question-circle"), "Currently active tmux sessions"))
   ),
-  max_height = 200,
   card_body(
-    reactableOutput("table")
+    tags$div(
+      class = "resizable",
+      style = "resize: vertical; overflow: auto; min-height: 100px; max-height: 50vh;",
+      reactableOutput("table")
+    )
   )
 )
 
@@ -50,9 +53,12 @@ card2 <- card(
     class = "bg-secondary",
     tags$a("Session output", tooltip(bsicons::bs_icon("question-circle"), "Output from the selected tmux session"))
   ),
-  max_height = 450,
   card_body(
-    verbatimTextOutput("stdout")
+    tags$div(
+      class = "resizable",
+      style = "resize: vertical; overflow: auto; min-height: 200px; max-height: 70vh;",
+      verbatimTextOutput("stdout")
+    )
   )
 )
 
@@ -106,7 +112,7 @@ ui <- page_navbar(
 )
 
 ### secure app -----------------------------###
-ui <- secure_app(ui,theme = "simplex")
+ui <- secure_app(ui,theme = "simplex", fab_position = "none")
 credentials <- readRDS("credentials.rds")
 
 server <- function(input, output, session) {

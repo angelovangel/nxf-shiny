@@ -71,6 +71,13 @@ body {
     padding: 1rem;
 }
 
+/* Make certain output areas user-resizable (vertical only) */
+.resizable {
+    resize: vertical;
+    overflow: auto;
+}
+
+
 /* Custom style for a selected shinyFiles button */
 .selected-file-button {
     background-color: #F0F8FF !important;
