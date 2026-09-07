@@ -155,11 +155,11 @@ server <- function(input, output, session) {
 
 
   # special case shinyFiles - shinyDirChoose bindings in server
-  shinyDirChoose(input, "copy_output_dir", roots = c(home = Sys.getenv("HOME"), mnt = "/mnt"), allowDirCreate = FALSE)
+  shinyDirChoose(input, "copy_output_dir", roots = valid_shiny_roots(), allowDirCreate = FALSE)
 
   observeEvent(input$copy_output_dir, {
     selected_copy_dir <- parseDirPath(
-      roots = c(home = Sys.getenv("HOME"), mnt = "/mnt"),
+      roots = valid_shiny_roots(),
       selection = input$copy_output_dir
     )
 
@@ -212,7 +212,7 @@ server <- function(input, output, session) {
       # **MODIFIED LOGIC**
       if (input_type == "shinyDirButton") {
         # Only parse if a selection has been made (path element exists)
-        parsed_dir <- parseDirPath(roots = c(home = Sys.getenv("HOME"), mnt = "/mnt"), selection = current_value)
+        parsed_dir <- parseDirPath(roots = valid_shiny_roots(), selection = current_value)
 
         # add/remove css class for better ui
         if (is.list(current_value)) {
@@ -224,10 +224,10 @@ server <- function(input, output, session) {
             "$('#", id, "').removeClass('selected-file-button');"
           ))
         }
-        display_value <- parsed_dir[1] # Display only the path string
+        display_value <- if (length(parsed_dir) > 0) parsed_dir[1] else "" # Display only the path string
       } else if (input_type == "shinyFilesButton") {
         # Only parse if a selection has been made (files element exists)
-        parsed_file <- parseFilePaths(roots = c(home = Sys.getenv("HOME"), mnt = "/mnt"), selection = current_value)
+        parsed_file <- parseFilePaths(roots = valid_shiny_roots(), selection = current_value)
 
         # add/remove css class for better ui
         if (is.list(current_value)) {
@@ -240,14 +240,14 @@ server <- function(input, output, session) {
           ))
         }
         # Display only the datapath string (first selected file)
-        display_value <- parsed_file$datapath[1]
+        display_value <- if (!is.null(parsed_file$datapath) && length(parsed_file$datapath) > 0) parsed_file$datapath[1] else ""
       } else if (input_type == "fileInput" && !is.null(current_value$datapath)) {
         # Handle regular fileInput
         display_value <- current_value$datapath
       }
 
       # Skip if the path is empty/not yet selected (e.g., character(0))
-      if (length(display_value) == 0 || is.na(display_value)) {
+      if (length(display_value) == 0 || all(is.na(display_value))) {
         display_value <- ""
       }
 
