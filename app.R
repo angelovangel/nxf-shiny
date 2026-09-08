@@ -17,6 +17,11 @@ library(fs)
 
 source("global.R")
 
+git_commit <- tryCatch({
+  sha <- system("git -C . rev-parse --short HEAD", intern = TRUE, ignore.stderr = TRUE)
+  if (length(sha) > 0 && nzchar(sha[1])) sha[1] else "unknown"
+}, error = function(e) "unknown")
+
 sidebar <- sidebar(
   # title = '',
   tagList(
@@ -77,6 +82,10 @@ ui <- page_navbar(
       style = "font-size: 1.2rem; font-weight: bold; margin-left: 0em; color: #0047AB;"
     ),
     tags$span(
+      paste0("commit ", git_commit),
+      style = "font-size: 0.7rem; font-weight: 600; margin-left: 0.3rem; color: #0047AB; vertical-align: middle;"
+    ),
+    tags$span(
       # icon('align-center'),
       "Run any Nextflow pipeline using a JSON params spec file",
       tags$a(
@@ -85,7 +94,7 @@ ui <- page_navbar(
         # rel="noopener noreferrer",
         bs_icon("github")
       ),
-      style = "font-size: 0.85rem; font-weight: normal; margin-left: 10em; color: #4B5563;"
+      style = "font-size: 0.85rem; font-weight: normal; margin-left: 3em; color: #4B5563;"
     )
   ),
   sidebar = sidebar,
