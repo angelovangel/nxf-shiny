@@ -134,9 +134,11 @@ server <- function(input, output, session) {
     size = NA
   )
 
-  # check nextflow, docker and tmux are on path
-  if (!bin_on_path("nextflow") | !bin_on_path("docker") | !bin_on_path("tmux")) {
-    showNotification("nextflow and/or docker and/or tmux not found!", type = "error")
+  # check nextflow, a supported container engine, and tmux are on path
+  # Docker is required for docker-based pipelines; Singularity/Apptainer is used for singularity-based ones.
+  container_ok <- bin_on_path("docker") || bin_on_path("singularity") || bin_on_path("apptainer")
+  if (!bin_on_path("nextflow") || !container_ok || !bin_on_path("tmux")) {
+    showNotification("nextflow, tmux, and a supported container engine (docker/singularity/apptainer) are required!", type = "error")
   } else {
     showNotification("The server is ready!", type = "message")
   }
