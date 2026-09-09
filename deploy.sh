@@ -137,10 +137,14 @@ if [ "$SKIP_SYS_DEPS" = false ]; then
 
         log_info "Installing system packages & latest R..."
         
-        # Handle containerd conflict before docker installation
-        log_info "Resolving containerd conflicts..."
-        $SUDO apt-get remove -y containerd >/dev/null 2>&1 || true
-        $SUDO apt-get autoremove -y >/dev/null 2>&1 || true
+        # Check if Docker is already installed
+        if command -v docker >/dev/null 2>&1; then
+            log_info "Docker already installed. Skipping Docker installation."
+        else
+            log_info "Installing Docker..."
+            $SUDO apt-get install -y docker.io
+            log_success "Docker installed successfully."
+        fi
         
         $SUDO apt-get install -y \
             curl \
@@ -170,8 +174,7 @@ if [ "$SKIP_SYS_DEPS" = false ]; then
             libjpeg-dev \
             libgit2-dev \
             libuv1-dev \
-            cmake \
-            docker.io
+            cmake
         log_success "System packages installed successfully."
     else
         log_warn "apt-get not detected. Please ensure R, Java 11+, tmux, curl, and build tools are installed."
