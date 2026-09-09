@@ -136,6 +136,12 @@ if [ "$SKIP_SYS_DEPS" = false ]; then
         fi
 
         log_info "Installing system packages & latest R..."
+        
+        # Handle containerd conflict before docker installation
+        log_info "Resolving containerd conflicts..."
+        $SUDO apt-get remove -y containerd >/dev/null 2>&1 || true
+        $SUDO apt-get autoremove -y >/dev/null 2>&1 || true
+        
         $SUDO apt-get install -y \
             curl \
             wget \
@@ -214,106 +220,53 @@ install_nextflow() {
 
 if ! command -v nextflow >/dev/null 2>&1; then
     install_nextflow "/usr/local/bin"
-    log_success "Nextflow v${NEXTFLOW_VERSION} installed: $(nextflow -v 2>/dev/null || echo 'Installed')"
+fi
+
+if command -v nextflow >/dev/null 2>&1; then
+    NXF_INSTALLED_VERSION=$(nextflow -version | grep -oP '(?<=version\s)\S+')
+    log_success "Nextflow v${NXF_INSTALLED_VERSION} is installed."
 else
-    CURRENT_NXF_VER="$(nextflow -v 2>/dev/null || echo '')"
-    if echo "$CURRENT_NXF_VER" | grep -q "$NEXTFLOW_VERSION"; then
-        log_success "Nextflow is already installed at pinned version: ${CURRENT_NXF_VER}"
-    else
-        log_warn "Existing Nextflow version found (${CURRENT_NXF_VER}). Re-installing pinned version v${NEXTFLOW_VERSION}..."
-        install_nextflow "/usr/local/bin"
-        log_success "Updated Nextflow to v${NEXTFLOW_VERSION}: $(nextflow -v 2>/dev/null || echo 'Updated')"
-    fi
+    log_warn "Nextflow installation skipped or failed. Manual installation may be needed."
 fi
 
 # ==============================================================================
-# 3. Docker & Container Engine Setup
+# 3. Create Required Directories
 # ==============================================================================
-log_info "Configuring Docker container engine..."
+log_info "Setting up application directories..."
+mkdir -p "${APP_DIR}/logs"
+mkdir -p "${APP_DIR}/data"
+log_success "Directories created: logs, data"
+
+# ==============================================================================
+# 4. Docker/Containerd Setup
+# ==============================================================================
 if command -v docker >/dev/null 2>&1; then
-    log_success "Docker is installed: $(docker --version 2>/dev/null || echo 'Found')"
+    log_info "Docker detected. Verifying daemon..."
+    if $SUDO systemctl is-active --quiet docker 2>/dev/null; then
+        log_success "Docker daemon is running."
+    else
+        log_info "Starting Docker daemon..."
+        $SUDO systemctl start docker 2>/dev/null || true
+        $SUDO systemctl enable docker 2>/dev/null || true
+    fi
     
-    # Enable and start Docker service if systemctl is available
-    if command -v systemctl >/dev/null 2>&1 && [ -n "$SUDO" ]; then
-        $SUDO systemctl enable --now docker 2>/dev/null || true
-    fi
-
-    # Add current non-root user to the docker group if needed
-    if [ "$(id -u)" -ne 0 ] && [ -n "$SUDO" ]; then
-        if ! id -nG "$CURRENT_USER" 2>/dev/null | grep -qw "docker"; then
-            log_info "Adding user '${CURRENT_USER}' to docker group..."
-            $SUDO usermod -aG docker "$CURRENT_USER" 2>/dev/null || true
-            log_warn "User '${CURRENT_USER}' added to 'docker' group. You may need to re-login for group changes to take effect."
+    # Add current user to docker group (if not root)
+    if [ "$(id -u)" -ne 0 ] && command -v docker >/dev/null 2>&1; then
+        if ! groups "${SERVICE_USER:-$CURRENT_USER}" | grep -q docker; then
+            log_info "Adding ${SERVICE_USER:-$CURRENT_USER} to docker group..."
+            $SUDO usermod -aG docker "${SERVICE_USER:-$CURRENT_USER}" 2>/dev/null || true
+            log_warn "User added to docker group. Log out and back in for changes to take effect."
         fi
     fi
 else
-    log_warn "Docker is not found on PATH. Container pipelines may require Docker or Singularity/Apptainer."
+    log_warn "Docker not installed. Nextflow container execution will be unavailable."
 fi
 
 # ==============================================================================
-# 4. Directory Structure & Permissions
+# 5. R Package Installation
 # ==============================================================================
-log_info "Setting up application directory structure..."
-mkdir -p logs output work instances demo www
-chmod +x bin/*.sh 2>/dev/null || true
-log_success "Directories ready: logs/, output/, work/, instances/, demo/, www/"
-
-# ==============================================================================
-# 5. Setup credentials.rds
-# ==============================================================================
-log_info "Configuring credentials.rds..."
-if [ -f "credentials.rds" ] && [ "$RESET_CREDENTIALS" = false ]; then
-    log_info "credentials.rds already exists. Skipping (use --reset-credentials to overwrite)."
-else
-    if [ -z "$APP_USER" ]; then
-        if [ "$NON_INTERACTIVE" = true ]; then
-            APP_USER="$APP_USER_DEFAULT"
-        else
-            read -rp "Enter admin username for Shiny login [${APP_USER_DEFAULT}]: " input_user
-            APP_USER="${input_user:-$APP_USER_DEFAULT}"
-        fi
-    fi
-
-    if [ -z "$APP_PASS" ]; then
-        if [ "$NON_INTERACTIVE" = true ]; then
-            APP_PASS="$APP_PASS_DEFAULT"
-        else
-            read -rsp "Enter admin password for Shiny login [press Enter to use default]: " input_pass
-            echo ""
-            APP_PASS="${input_pass:-$APP_PASS_DEFAULT}"
-        fi
-    fi
-
-    log_info "Generating credentials.rds for user '${APP_USER}'..."
-    Rscript -e "
-      args <- commandArgs(trailingOnly = TRUE)
-      user <- args[1]
-      pass <- args[2]
-      credentials <- data.frame(
-        user = user,
-        password = pass,
-        admin = TRUE,
-        comment = '',
-        stringsAsFactors = FALSE
-      )
-      saveRDS(credentials, 'credentials.rds')
-    " "$APP_USER" "$APP_PASS"
-
-    chmod 600 credentials.rds
-    log_success "credentials.rds generated successfully."
-fi
-
-# ==============================================================================
-# 5. R Dependencies via renv
-# ==============================================================================
-log_info "Restoring R package dependencies..."
-export RENV_CONFIG_RSPM_ENABLED=TRUE
-export RENV_CONFIG_SYNCHRONIZED_CHECK=FALSE
-export USE_BUNDLED_LIBUV=1
+log_info "Installing R packages via renv..."
 Rscript -e '
-  Sys.setenv(RENV_CONFIG_RSPM_ENABLED = "TRUE")
-  Sys.setenv(RENV_CONFIG_SYNCHRONIZED_CHECK = "FALSE")
-  options(renv.config.synchronized.check = FALSE)
   get_binary_repo <- function() {
     codename <- ""
     if (file.exists("/etc/os-release")) {
