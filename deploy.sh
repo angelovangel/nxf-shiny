@@ -241,6 +241,58 @@ mkdir -p "${APP_DIR}/data"
 log_success "Directories created: logs, data"
 
 # ==============================================================================
+# Setup credentials.rds
+# ==============================================================================
+log_info "Configuring credentials.rds..."
+if [ -f "credentials.rds" ] && [ "$RESET_CREDENTIALS" = false ]; then
+    log_info "credentials.rds already exists. Skipping (use --reset-credentials to overwrite)."
+else
+    if [ -z "$APP_USER" ]; then
+        if [ "$NON_INTERACTIVE" = true ]; then
+            APP_USER="$APP_USER_DEFAULT"
+        else
+            read -rp "Enter admin username for Shiny login [${APP_USER_DEFAULT}]: " input_user
+            APP_USER="${input_user:-$APP_USER_DEFAULT}"
+        fi
+    fi
+
+    if [ -z "$APP_PASS" ]; then
+        if [ "$NON_INTERACTIVE" = true ]; then
+            APP_PASS="$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 16 || openssl rand -base64 12)"
+            log_warn "Generated random admin password: ${APP_PASS}"
+        else
+            while [ -z "$APP_PASS" ]; do
+                read -rsp "Enter admin password for Shiny login: " input_pass
+                echo ""
+                if [ -z "$input_pass" ]; then
+                    log_warn "Password cannot be empty. Please enter a valid password."
+                else
+                    APP_PASS="$input_pass"
+                fi
+            done
+        fi
+    fi
+
+    log_info "Generating credentials.rds for user '${APP_USER}'..."
+    Rscript -e "
+      args <- commandArgs(trailingOnly = TRUE)
+      user <- args[1]
+      pass <- args[2]
+      credentials <- data.frame(
+        user = user,
+        password = pass,
+        admin = TRUE,
+        comment = '',
+        stringsAsFactors = FALSE
+      )
+      saveRDS(credentials, 'credentials.rds')
+    " "$APP_USER" "$APP_PASS"
+
+    chmod 600 credentials.rds
+    log_success "credentials.rds generated successfully."
+fi
+
+# ==============================================================================
 # 4. Docker/Containerd Setup
 # ==============================================================================
 if command -v docker >/dev/null 2>&1; then
