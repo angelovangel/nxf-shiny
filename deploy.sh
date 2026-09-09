@@ -31,8 +31,7 @@ APP_DIR="${SCRIPT_DIR}"
 cd "${APP_DIR}"
 
 # --- Default Parameters ---
-APP_USER_DEFAULT="tgs"
-APP_PASS_DEFAULT="PinkFlamingo23_1"
+APP_USER_DEFAULT="admin"
 SHINY_PORT_DEFAULT=3838
 APP_USER="${APP_USER:-}"
 APP_PASS="${APP_PASS:-}"
