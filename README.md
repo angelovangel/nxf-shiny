@@ -71,3 +71,9 @@ The steps to add a new nextflow pipeline for use with this Shiny app:
 
 >Note about profiles   
 The `nextflow -profile` can be used by defining the profiles in the input json, like a normal parameter with `"inputId": "profile"`. Currently, pipeline parameters defined with `-profile` is not working.
+
+### Deploy
+Use `./deploy.sh` on a fresh Ubuntu 22.04 server. 
+
+>The deploy script only configures the instance's OS firewall (iptables/ufw). Oracle Cloud also blocks inbound traffic at the VCN level by default, so you must separately open the app port there:
+In the OCI Console, go to Networking → Virtual Cloud Networks → your VCN → Subnets → your subnet → Security List → Add Ingress Rules, and add: Source CIDR 0.0.0.0/0, IP Protocol TCP, Destination Port 3838.
