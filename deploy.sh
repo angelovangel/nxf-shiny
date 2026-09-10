@@ -513,7 +513,8 @@ fi
 # ==============================================================================
 # 10. Deployment Summary & Usage Instructions
 # ==============================================================================
-IP_ADDR="$(hostname -I 2>/dev/null | awk '{print $1}' || echo "YOUR_SERVER_IP")"
+IP_ADDR="$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7}')"
+
 
 echo ""
 echo -e "${BOLD}${GREEN}===================================================${NC}"
