@@ -400,12 +400,16 @@ server <- function(input, output, session) {
         tar_name <- paste0(id, ".tar.gz")
         tar_path <- file.path("www", tar_name)
 
-        # Check if shell is idle (no child processes)
-        is_idle <- FALSE
-        if (!is.na(pid)) {
-          children <- suppressWarnings(system2("pgrep", args = c("-P", pid), stdout = TRUE))
-          if (length(children) == 0) is_idle <- TRUE
-        }
+        # Path to a marker file for completed Nextflow processes
+        done_marker_path <- file.path("instances", id, ".done")
+        is_idle <- file.exists(done_marker_path)
+
+        # # Check if shell is idle (no child processes)
+        # is_idle <- FALSE
+        # if (!is.na(pid)) {
+        #   children <- suppressWarnings(system2("pgrep", args = c("-P", pid), stdout = TRUE))
+        #   if (length(children) == 0) is_idle <- TRUE
+        # }
 
         if (!is.na(id) && file.exists(tar_path) && is_idle) {
           paste0('<a href="', tar_name, '" download>', id, "</a>")
@@ -586,6 +590,7 @@ server <- function(input, output, session) {
       copy_cmd,
       "&&",
       "tar", "-czf", shQuote(file.path("../../www", paste0(session_id, ".tar.gz"))), "--exclude='work'", "-C", "..", session_id,
+      "&& touch .done",
       sep = " "
     )
 
